@@ -1,11 +1,5 @@
 ﻿using ADORest.BusinessObjects;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.DirectoryServices.ActiveDirectory;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ADORest
 {

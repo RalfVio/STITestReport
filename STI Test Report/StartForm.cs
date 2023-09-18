@@ -1,14 +1,5 @@
 using ADORest.BusinessObjects;
-using Microsoft.VisualBasic.Devices;
 using Newtonsoft.Json;
-using System.DirectoryServices.ActiveDirectory;
-using System.IO;
-using System.IO.Pipes;
-using System.Net.Http;
-using System.Reflection;
-using System.Windows.Forms;
-using System.Xml.Linq;
-using static STI_Test_Report.StartForm;
 
 namespace STI_Test_Report
 {
