@@ -8,6 +8,7 @@ namespace STI_Test_Report
         const string _appDataName = "STI Test Report";
         const string _teamProjectsFileName = "TeamProjects.txt";
         const string _queueSubFolder = "Queue";
+        const string _templateDB = "Template.db";
 
         /// <summary>
         ///  The main entry point for the application.
@@ -21,13 +22,15 @@ namespace STI_Test_Report
                 if (attribute is AssemblyCompanyAttribute companyAttribute)
                     _companyName = companyAttribute.Company;
             }
+
             string appDatafolder = GetApplicationDataFolder(null);
             if (!Directory.Exists(appDatafolder))
                 Directory.CreateDirectory(appDatafolder);
-
-            //static Configuration.LocalSettings _localSettings = null;
-            //static StreamWriter _processFileWriter = null;
-
+            if (!Directory.Exists(GetApplicationDataFolder(_queueSubFolder)))
+                Directory.CreateDirectory(GetApplicationDataFolder(_queueSubFolder));
+            if (!File.Exists(GetApplicationDataFolder(_templateDB)))
+            File.Copy(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), _templateDB),
+                GetApplicationDataFolder(_templateDB));
 
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
