@@ -152,7 +152,7 @@ namespace STI_Test_Report
                 return;
 
             var testSuiteIds = new List<int>();
-            if (this.testSuite_TextBox.Text.Trim() != null)
+            if (this.testSuite_TextBox.Text.Trim() != "")
             {
                 var tss = this.testSuite_TextBox.Text.Trim().Split(',');
                 foreach (var ts in tss)
@@ -337,7 +337,14 @@ namespace STI_Test_Report
             if (stream == null)
                 return;
             stream.Position = 0;
-            stream.CopyTo(new FileStream(pdfFilePath, FileMode.Create));
+
+            using (var fs = new FileStream(pdfFilePath, FileMode.Create))
+            {
+                stream.CopyTo(fs);
+                fs.Flush();
+                fs.Close();
+            }
+            
         }
 
         public class TeamProjects
