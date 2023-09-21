@@ -70,6 +70,9 @@
           <Component Id="comp0014" Guid="f4283a01-40c0-4257-871b-bf46681f0512">
                 <File Id="file0014" Source="..\STI Test Report\bin\Release\net6.0-windows\Template.db" KeyPath="yes" Checksum="yes"/>
           </Component>
+          <Component Id="comp0015" Guid="ea8991aa-6bc5-440e-8a33-143eb940169e">
+                <File Id="file0015" Source="..\STI Test Report\bin\Release\net6.0-windows\win-x64\SQLite.Interop.dll" KeyPath="yes" Checksum="yes"/>
+          </Component>
         </DirectoryRef>
 
        <!-- Step 3: Add the shortcut to your installer package -->
@@ -102,6 +105,7 @@
             <ComponentRef Id="comp0012" />
             <ComponentRef Id="comp0013" />
             <ComponentRef Id="comp0014" />
+            <ComponentRef Id="comp0015" />
              <!-- Step 5: Tell WiX to install the shortcut -->
             <ComponentRef Id="ApplicationShortcut" />
         </Feature>
