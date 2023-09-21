@@ -8,6 +8,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <Authors>Bhakthavathsala R B, Ralf Viola</Authors>
+    <Copyright>©Philips 2023</Copyright>
     <Company>Philips</Company>
     <ProductName>STI Test Report</ProductName>
   </PropertyGroup>
