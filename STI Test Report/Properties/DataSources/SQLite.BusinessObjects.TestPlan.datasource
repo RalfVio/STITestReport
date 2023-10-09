@@ -6,5 +6,5 @@
     cause the file to be unrecognizable by the program.
 -->
 <GenericObjectDataSource DisplayName="TestPlan" Version="1.0" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
-  <TypeInfo>ADORest.BusinessObjects.TestPlan, STI Test Report, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</TypeInfo>
+  <TypeInfo>SQLite.BusinessObjects.TestPlan, SQLiteConnector, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</TypeInfo>
 </GenericObjectDataSource>
