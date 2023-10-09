@@ -74,7 +74,7 @@ namespace ADORest
  
 
         #region Helper functions
-        protected static string SqlIds(List<int> ids)
+        internal static string SqlIds(List<int> ids)
         {
             string result = null;
             foreach (int id in ids)

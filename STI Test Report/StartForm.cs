@@ -1,5 +1,7 @@
 using ADORest.BusinessObjects;
 using Newtonsoft.Json;
+using PdfSharpCore.Internal;
+using SQLite.BusinessObjects;
 
 namespace STI_Test_Report
 {
@@ -8,12 +10,13 @@ namespace STI_Test_Report
         bool _active = false;
         ADORest.RestTestPlan _adoRest = null;
         List<TestPlan> _testPlans = null;
+        TestPlan _testPlan = null;
         TeamProjects _teamProjects = null;
         string _reportFileName = null;
         public StartForm()
         {
             InitializeComponent();
-            PrintControls(false);
+            PrintControls(false, false);
         }
 
         #region Events
@@ -21,14 +24,14 @@ namespace STI_Test_Report
         #region Form
         private async void StartForm_Shown(object sender, EventArgs e)
         {
-            this.Cursor= Cursors.WaitCursor;
+            this.Cursor = Cursors.WaitCursor;
             this.status_toolStripStatusLabel.Text = "Reading test plans";
             Application.DoEvents();
 
-            _teamProjects = GetTeamProjects();
+            _teamProjects = TeamProjects.GetTeamProjects();
             if (_teamProjects == null)
-            { 
-                if(!File.Exists(Program.GetTeamProjectsFilePath()))
+            {
+                if (!File.Exists(Program.GetTeamProjectsFilePath()))
                 {
                     _teamProjects = TeamProjects.CreateExample();
 
@@ -40,7 +43,7 @@ namespace STI_Test_Report
 
                 }
             }
-            
+
             if (_teamProjects != null)
             {
                 for (int i = 0; i < _teamProjects.Projects.Count; i++)
@@ -49,12 +52,12 @@ namespace STI_Test_Report
                     {
                         Name = $"fileTeamProject{i}ToolStripMenuItem",
                         Text = _teamProjects.Projects[i].Title,
-                        Tag = (i+1).ToString(),
+                        Tag = (i + 1).ToString(),
                     };
                     this.file_TeamProjects_toolStripMenuItem.DropDownItems.Add(menuItem);
                     menuItem.Click += file_TeamProject_toolStripMenuItem_Click;
                 }
-               
+
             }
 
             var teamProject = _teamProjects.GetProject();
@@ -70,13 +73,18 @@ namespace STI_Test_Report
             catch { }
 
             this.status_toolStripStatusLabel.Text = "";
+            this.testPlan_textBox.Focus();
             this.Cursor = Cursors.Default;
             _active = true;
+            this.testPlan_textBox.Text = Program.UserSettings.TestPlanFilter ?? "";
+            if (this.testPlan_textBox.Text != "")
+                this.testPlan_comboBox.DroppedDown = true;
         }
         private void StartForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (_adoRest != null)
                 _adoRest.Dispose();
+            Program.UserSettingsSave();
         }
         #endregion
 
@@ -87,8 +95,8 @@ namespace STI_Test_Report
             this.Cursor = Cursors.WaitCursor;
             Application.DoEvents();
 
-            if(!int.TryParse (((ToolStripItem)sender).Tag as string,out int id))
-            {_active = true; this.Cursor = Cursors.Default; return; }
+            if (!int.TryParse(((ToolStripItem)sender).Tag as string, out int id))
+            { _active = true; this.Cursor = Cursors.Default; return; }
 
             _teamProjects.CurrentProject = id;
             var teamProject = _teamProjects.GetProject();
@@ -118,6 +126,9 @@ namespace STI_Test_Report
         #endregion
         private void testPlan_textBox_TextChanged(object sender, EventArgs e)
         {
+            if (!_active)
+                return;
+
             var testPlanFilter = ((TextBox)sender);
 
             _active = false;
@@ -129,21 +140,23 @@ namespace STI_Test_Report
             testPlan_comboBox.DisplayMember = "TitleId";
             testPlan_comboBox.ValueMember = "Id";
             this.testPlan_comboBox.SelectedIndex = -1;
+            Program.UserSettings.TestPlanFilter = this.testPlan_textBox.Text;
             _active = true;
         }
         private void testPlan_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (!_active)
                 return;
-            var testPlan=((ComboBox)sender).SelectedItem as TestPlan;
-            if (testPlan == null)
+            _testPlan = ((ComboBox)sender).SelectedItem as TestPlan;
+            if (_testPlan == null)
+            {
+                PrintControls(false, false);
                 return;
+            }
 
-            string filePath = DBFilePath(testPlan.Id);
-            PrintControls(System.IO.File.Exists(filePath));
+            string filePath = DBFilePath();
+            PrintControls(true, System.IO.File.Exists(filePath));
         }
-
-        #endregion
 
         private async void print_button_Click(object sender, EventArgs e)
         {
@@ -151,19 +164,7 @@ namespace STI_Test_Report
             if (testPlanWorkItem == null)
                 return;
 
-            var testSuiteIds = new List<int>();
-            if (this.testSuite_TextBox.Text.Trim() != null)
-            {
-                var tss = this.testSuite_TextBox.Text.Trim().Split(',');
-                foreach (var ts in tss)
-                {
-                    if (!int.TryParse(ts, out int testSuiteId))
-                        return;
-                    testSuiteIds.Add(testSuiteId);
-                }
-            }
-
-            string dbFilePath = DBFilePath(testPlanWorkItem.Id);
+            string dbFilePath = DBFilePath();
             if (!System.IO.File.Exists(dbFilePath))
                 return;
 
@@ -171,11 +172,14 @@ namespace STI_Test_Report
             if (pdf_SaveFileDialog.ShowDialog() != DialogResult.OK)
                 return;
 
-            bool optionNotRun = notRun_checkBox.Checked;
-            bool optionNotApplicable = this.notApplicable_checkBox2.Checked;
-            bool optionLastTestRun = this.lastTestRun_checkBox.Checked;
-            bool optionNoTestResults = this.noTestResults_checkBox4.Checked;
-            bool optionNoTestSteps=this.noTestSteps_checkBox.Checked;
+            ReportOptionsForm.ReportOptions reportOptions = null;
+            using (var f = new ReportOptionsForm())
+            {
+                if (f.ShowDialog() == DialogResult.OK)
+                    reportOptions = f.GetReportOptions();
+            }
+            if (reportOptions == null)
+                return;
 
             _reportFileName = pdf_SaveFileDialog.FileName;
             try
@@ -183,23 +187,23 @@ namespace STI_Test_Report
                 if (File.Exists(_reportFileName))
                     File.Delete(_reportFileName);
             }
-            catch { this.status_toolStripStatusLabel.Text = "File is locked.";return;}
+            catch { this.status_toolStripStatusLabel.Text = "File is locked."; return; }
 
             this.status_toolStripStatusLabel.Text = "Creating file";
             this.open_linkLabel.Visible = false;
 
             this.Cursor = Cursors.WaitCursor;
 
-            await Task.Run(() => CreateReport(_reportFileName, dbFilePath, optionNotRun, optionNotApplicable, optionLastTestRun, optionNoTestResults, optionNoTestSteps, testSuiteIds));
-            
+            await Task.Run(() => CreateReport(_reportFileName, dbFilePath, reportOptions));
+
             this.open_linkLabel.Visible = File.Exists(_reportFileName);
             this.status_toolStripStatusLabel.Text = "Done";
             this.Cursor = Cursors.Default;
         }
-        
+
         private void open_linkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if(string.IsNullOrEmpty(_reportFileName) || !File.Exists(_reportFileName))
+            if (string.IsNullOrEmpty(_reportFileName) || !File.Exists(_reportFileName))
                 return;
 
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
@@ -209,7 +213,7 @@ namespace STI_Test_Report
             });
         }
 
-   
+
         private void dataOpenFolder_ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
@@ -218,22 +222,74 @@ namespace STI_Test_Report
                 UseShellExecute = true,
             }); ;
         }
+        private async void Read_button_Click(object sender, EventArgs e)
+        {
+            var testPlanWorkItem = this.testPlan_comboBox.SelectedItem as TestPlan;
+            if (testPlanWorkItem == null)
+                return;
+
+            ReadReportData.Parameters parameters = null;
+            using (var f = new ReadForm())
+            {
+                if (f.ShowDialog() == DialogResult.OK)
+                {
+                    parameters = f.GetReadParameters();
+                }
+            }
+
+            if (parameters == null)
+                return;
+            parameters.TestPlanId = testPlanWorkItem.Id;
+
+            await ReadReportData(parameters);
+        }
+        #endregion
+
+        SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+        async Task ReadReportData(ReadReportData.Parameters parameters)
+        {
+            await _semaphore.WaitAsync();
+
+            this.Cursor = Cursors.WaitCursor;
+            _logWriter = new StreamWriter(GetFreeLogFilePath(), false, System.Text.Encoding.UTF8);
+            _logWriter.WriteLine();
+            _logWriter.WriteLine(parameters.LogHeader());
+            _logWriter.WriteLine(""); _logWriter.WriteLine(new string('-', 80));
+            var teamProject = _teamProjects.GetProject();
+            if (_adoRest == null)
+                _adoRest = new ADORest.RestTestPlan(teamProject);
+
+            ReadReportData readData = null;
+            try
+            {
+                readData = new ReadReportData();
+                readData.WriteLog += WriteStatus;
+                await readData.Start(parameters, _adoRest, teamProject, DBFilePath());
+            }
+            catch (Exception ex)
+            {
+                WriteLog(ex);
+            }
+            finally
+            {
+                readData.WriteLog -= WriteStatus;
+                _logWriter.WriteLine(new string('-', 80));
+                _logWriter.Flush(); _logWriter.Dispose(); _logWriter = null;
+                this.Cursor = Cursors.Default;
+                _semaphore.Release();
+            }
+        }
 
         #region Functions
-        string DBFilePath(int testPlanId) => Program.GetApplicationDataFolder($"{_teamProjects.CurrentProject}_{testPlanId}.db");
-        void PrintControls(bool enable)
+        string DBFilePath() => Program.GetApplicationDataFolder($"{_teamProjects.CurrentProject}_{_testPlan.Id}.db");
+        void PrintControls(bool enable, bool dbExists)
         {
-            notRun_checkBox.Enabled = enable;
-            noTestSteps_checkBox.Enabled = enable;
-            noTestResults_checkBox4.Enabled = enable;
-            lastTestRun_checkBox.Enabled = enable;
-            notApplicable_checkBox2.Enabled = enable;
-            testSuite_TextBox.Enabled = enable;
-            this.print_button.Enabled = enable;
+            this.print_button.Enabled = enable && dbExists;
+            this.read_button.Enabled = enable;
             if (!enable)
                 this.open_linkLabel.Visible = false;
         }
-        void CreateReport(string pdfFilePath, string dbFilePath, bool optionNotRun, bool optionNotApplicable, bool optionLastTestRun, bool optionNoTestResults, bool optionNoTestSteps, List<int> testSuiteIds)
+        void CreateReport(string pdfFilePath, string dbFilePath, ReportOptionsForm.ReportOptions reportOptions)
         {
             var sqlLiteBL = new SQLiteConnector.BL();
             sqlLiteBL.OpenDatabase(dbFilePath);
@@ -242,7 +298,7 @@ namespace STI_Test_Report
 
             pdfReport.PrintStart(testPlan, 1, true);
 
-            var testSuites = sqlLiteBL.TestSuitesRead(testSuiteIds);
+            var testSuites = sqlLiteBL.TestSuitesRead(reportOptions.TestSuiteIds);
 
             foreach (var testSuite in testSuites)
             {
@@ -254,14 +310,14 @@ namespace STI_Test_Report
 
                     if (testPoint.LastTestRunId <= 0)
                     {
-                        if (optionNotRun)
+                        if (reportOptions.NotRun)
                             continue;
                     }
                     else
                         switch (testPoint.Outcome)
                         {
                             case "NotApplicable":
-                                if (optionNotApplicable)
+                                if (reportOptions.NotApplicable)
                                     continue;
                                 else
                                     break;
@@ -271,14 +327,14 @@ namespace STI_Test_Report
                     { pdfReport.Print(testSuite); isNewTestSuite = false; }
 
                     pdfReport.Print(testPoint);
-                    if (optionNoTestResults)
+                    if (reportOptions.NoTestResults)
                         continue;
 
-                    var testResults = sqlLiteBL.TestResultsRead(testPoint, optionLastTestRun ? testPoint.LastTestRunId : (int?)null);
+                    var testResults = sqlLiteBL.TestResultsRead(testPoint, reportOptions.LastTestRun ? testPoint.LastTestRunId : (int?)null);
                     foreach (var testResult in testResults)
                     {
                         pdfReport.Print(testResult, null);
-                        if (!optionNoTestSteps)
+                        if (!reportOptions.NoTestSteps)
                         {
                             var steps = testResult.GetTestCaseSteps();
                             if (testResult.Iterations != null)
@@ -337,55 +393,68 @@ namespace STI_Test_Report
             if (stream == null)
                 return;
             stream.Position = 0;
-            stream.CopyTo(new FileStream(pdfFilePath, FileMode.Create));
-        }
 
-        public class TeamProjects
-        {
-            public TeamProjects() { Projects = new List<TeamProject>(); }
-            public int CurrentProject { get; set; }
-            public List<TeamProject> Projects { get; set; }
-            public static TeamProjects CreateExample()
+            using (var fs = new FileStream(pdfFilePath, FileMode.Create))
             {
-                var result = new TeamProjects() { CurrentProject = 1 };
-                result.Projects.Add(new TeamProject()
-                {
-                    Title = "Sample",
-                    OrganizationUrl = "https://dev.azure.com/<your org>",
-                    TeamProjectName = "<your team project>",
-                    PAT = "<your personal access token>"
-                });
-
-                return result;
+                stream.CopyTo(fs);
+                fs.Flush();
+                fs.Close();
             }
-            public TeamProject GetProject()
-            {
-                if (CurrentProject > 0 && CurrentProject <= Projects.Count)
-                    return Projects[CurrentProject - 1];
-                else
-                {
-                    this.CurrentProject = 1;
-                    return this.Projects.FirstOrDefault();
-                }
-            }
-        }
-        TeamProjects GetTeamProjects()
-        {
-            string filePath = Program.GetTeamProjectsFilePath();
-            if (!File.Exists(filePath))
-                return null;
 
-            return JsonConvert.DeserializeObject<TeamProjects>(File.ReadAllText(filePath));
         }
+
+
         static async Task<List<TestPlan>> GetTestPlans(ADORest.RestTestPlan adoRest)
         {
             List<TestPlan> result = null;
             result = await adoRest.GetTestPlans();
-            return result.OrderBy(tp=>tp.Title).ToList();
+            return result.OrderBy(tp => tp.Title).ToList();
         }
 
         #endregion
 
-       
+        #region Logging
+        private void WriteStatus(string message)
+        {
+            this.status_toolStripStatusLabel.Text = message;
+            WriteLog(message);
+        }
+        private void WriteStatus(object sender, LogEventArgs e) => WriteStatus(e.Message);
+
+        int _logMsgNo = 0;
+        StreamWriter _logWriter = null;
+        private void WriteLog(string msg) { _logMsgNo++; WriteLog(msg, (_logMsgNo % 10) == 0); }
+        private void WriteLog(string msg, bool flush)
+        {
+            if (_logWriter == null)
+                return;
+            _logWriter.WriteLine(string.Format("{0:MM/dd/yyyy HH:mm:ss.ff}\t{1}", DateTime.Now, msg));
+            if (flush) { _logWriter.Flush(); }
+        }
+        private void WriteLog(Exception exception)
+        {
+            if (_logWriter == null)
+                return;
+            _logWriter.WriteLine(string.Format("{0:MM/dd/yyyy HH:mm:ss.ff}\tException: {1}", DateTime.Now, exception.Message));
+            _logWriter.Flush();
+        }
+        private string GetFreeLogFilePath()
+        {
+            string filePath = null;
+            bool fileIsAvailable = true;
+            int i = 0;
+            do
+            {
+                filePath = Path.Combine(Program.GetLogFolder(), $"{_teamProjects.CurrentProject}_{_testPlan.Id}_{(i + 1):#00}.txt");
+                fileIsAvailable = !File.Exists(filePath);
+
+                i++;
+            }
+            while (!fileIsAvailable);
+
+            return filePath;
+        }
+
+        #endregion
     }
 }

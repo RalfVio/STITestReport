@@ -29,46 +29,49 @@
         <!-- Step 2: Add files to your installer package -->
         <DirectoryRef Id="APPLICATIONROOTDIRECTORY">
           <Component Id="comp0000" Guid="c4bfdc40-4df0-41a0-896a-ab7a4cf23972">
-                <File Id="file0000" Source="..\STI Test Report\bin\Release\net6.0-windows\ICSharpCode.SharpZipLib.dll" KeyPath="yes" Checksum="yes"/>
+                <File Id="file0000" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\ICSharpCode.SharpZipLib.dll" KeyPath="yes" Checksum="yes"/>
           </Component>
           <Component Id="comp0001" Guid="7e9424ce-c4c8-4368-85bf-6524c1b70f75">
-                <File Id="file0001" Source="..\STI Test Report\bin\Release\net6.0-windows\Newtonsoft.Json.dll" KeyPath="yes" Checksum="yes"/>
+                <File Id="file0001" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\Newtonsoft.Json.dll" KeyPath="yes" Checksum="yes"/>
           </Component>
           <Component Id="comp0002" Guid="ea8059ee-04bc-4794-98dd-d0704e7a5549">
-                <File Id="file0002" Source="..\STI Test Report\bin\Release\net6.0-windows\PdfSharpCore.dll" KeyPath="yes" Checksum="yes"/>
+                <File Id="file0002" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\PdfSharpCore.dll" KeyPath="yes" Checksum="yes"/>
           </Component>
           <Component Id="comp0003" Guid="d1b72709-e5b5-4482-a6c6-fe24b89ed2b3">
-                <File Id="file0003" Source="..\STI Test Report\bin\Release\net6.0-windows\ReadMe.txt" KeyPath="yes" Checksum="yes"/>
+                <File Id="file0003" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\ReadMe.txt" KeyPath="yes" Checksum="yes"/>
           </Component>
           <Component Id="comp0004" Guid="c727dade-5ea7-49c1-9707-27a0df2e39f8">
-                <File Id="file0004" Source="..\STI Test Report\bin\Release\net6.0-windows\SixLabors.Fonts.dll" KeyPath="yes" Checksum="yes"/>
+                <File Id="file0004" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\SixLabors.Fonts.dll" KeyPath="yes" Checksum="yes"/>
           </Component>
           <Component Id="comp0005" Guid="76223e7c-9582-487f-ae34-4a63c1c8ea86">
-                <File Id="file0005" Source="..\STI Test Report\bin\Release\net6.0-windows\SixLabors.ImageSharp.dll" KeyPath="yes" Checksum="yes"/>
+                <File Id="file0005" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\SixLabors.ImageSharp.dll" KeyPath="yes" Checksum="yes"/>
           </Component>
           <Component Id="comp0006" Guid="fef2368e-c406-487f-8083-f28180566666">
-                <File Id="file0006" Source="..\STI Test Report\bin\Release\net6.0-windows\SQLiteConnector.dll" KeyPath="yes" Checksum="yes"/>
+                <File Id="file0006" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\SQLiteConnector.dll" KeyPath="yes" Checksum="yes"/>
           </Component>
           <Component Id="comp0007" Guid="f9d91ecb-5e7e-4466-b9c6-1c02a70b2251">
-                <File Id="file0007" Source="..\STI Test Report\bin\Release\net6.0-windows\SQLiteConnector.pdb" KeyPath="yes" Checksum="yes"/>
+                <File Id="file0007" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\SQLiteConnector.pdb" KeyPath="yes" Checksum="yes"/>
           </Component>
           <Component Id="comp0008" Guid="1eaba3a1-1f29-435b-9dc4-78c682316f6b">
-                <File Id="file0008" Source="..\STI Test Report\bin\Release\net6.0-windows\STI Test Report.deps.json" KeyPath="yes" Checksum="yes"/>
+                <File Id="file0008" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\STI Test Report.deps.json" KeyPath="yes" Checksum="yes"/>
           </Component>
           <Component Id="comp0009" Guid="75ac24e3-e435-470c-bdcf-3dbcec8ed35c">
-                <File Id="file0009" Source="..\STI Test Report\bin\Release\net6.0-windows\STI Test Report.dll" KeyPath="yes" Checksum="yes"/>
+                <File Id="file0009" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\STI Test Report.dll" KeyPath="yes" Checksum="yes"/>
           </Component>
           <Component Id="comp0010" Guid="4dd22ca5-8bfd-4ff3-a161-afbf7586235b">
-                <File Id="file0010" Source="..\STI Test Report\bin\Release\net6.0-windows\STI Test Report.exe" KeyPath="yes" Checksum="yes"/>
+                <File Id="file0010" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\STI Test Report.exe" KeyPath="yes" Checksum="yes"/>
           </Component>
           <Component Id="comp0012" Guid="1669e817-d5ad-481e-98a8-e4395d0a5970">
-                <File Id="file0012" Source="..\STI Test Report\bin\Release\net6.0-windows\STI Test Report.runtimeconfig.json" KeyPath="yes" Checksum="yes"/>
+                <File Id="file0012" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\STI Test Report.runtimeconfig.json" KeyPath="yes" Checksum="yes"/>
           </Component>
           <Component Id="comp0013" Guid="26c8d61d-504e-4a32-8e23-b2f67b68b325">
-                <File Id="file0013" Source="..\STI Test Report\bin\Release\net6.0-windows\System.Data.SQLite.dll" KeyPath="yes" Checksum="yes"/>
+                <File Id="file0013" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\System.Data.SQLite.dll" KeyPath="yes" Checksum="yes"/>
           </Component>
           <Component Id="comp0014" Guid="f4283a01-40c0-4257-871b-bf46681f0512">
-                <File Id="file0014" Source="..\STI Test Report\bin\Release\net6.0-windows\Template.db" KeyPath="yes" Checksum="yes"/>
+                <File Id="file0014" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\Template.db" KeyPath="yes" Checksum="yes"/>
+          </Component>
+          <Component Id="comp0015" Guid="ea8991aa-6bc5-440e-8a33-143eb940169e">
+                <File Id="file0015" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\runtimes\win-x64\native\SQLite.Interop.dll" KeyPath="yes" Checksum="yes"/>
           </Component>
         </DirectoryRef>
 
@@ -102,6 +105,7 @@
             <ComponentRef Id="comp0012" />
             <ComponentRef Id="comp0013" />
             <ComponentRef Id="comp0014" />
+            <ComponentRef Id="comp0015" />
              <!-- Step 5: Tell WiX to install the shortcut -->
             <ComponentRef Id="ApplicationShortcut" />
         </Feature>

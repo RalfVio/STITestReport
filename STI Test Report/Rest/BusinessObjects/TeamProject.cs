@@ -8,6 +8,7 @@ namespace ADORest.BusinessObjects
 {
     public class TeamProject
     {
+        public int Id { get; set; }
         public string Title { get; set; }
         public string OrganizationUrl { get; set; }
         public string TeamProjectName { get; set; }
