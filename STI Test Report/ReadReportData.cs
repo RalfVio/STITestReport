@@ -26,6 +26,7 @@ namespace STI_Test_Report
             public bool CreateNewFile { get; set; }
             public int? BatchSize { get; set; }
             public bool KeepRecords { get; set; }
+            public int Repeats { get; set; }
             public List<int> TestSuiteIds { get; set; }
 
             public string LogHeader()

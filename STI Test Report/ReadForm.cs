@@ -23,6 +23,7 @@ namespace STI_Test_Report
             this.testSuites_TextBox.Text = Program.UserSettings.GetTestSuiteIds();
             if (Program.UserSettings.BatchSize > 0)
                 this.batchSize_TextBox.Text = Program.UserSettings.BatchSize.ToString();
+            this.repeats_ComboBox.SelectedIndex = 0;
         }
 
         private void RadioButton_CheckedChanged(object sender, EventArgs e)
@@ -32,7 +33,7 @@ namespace STI_Test_Report
 
             this.testSuites_TextBox.Enabled = sender == readTestPoints_radioButton
                 || sender == readTestResults_radioButton;
-            this.batchSize_TextBox.Enabled = this.deleteRecords_CheckBox.Enabled = sender == readTestResults_radioButton;
+            this.batchSize_TextBox.Enabled = this.deleteRecords_CheckBox.Enabled = this.repeats_ComboBox.Enabled = sender == readTestResults_radioButton;
         }
 
         private void read_button_Click(object sender, EventArgs e)
@@ -53,6 +54,7 @@ namespace STI_Test_Report
             {
                 CreateNewFile = createDB_checkBox.Checked,
                 TestSuiteIds = testSuiteIds,
+                Repeats=1,
             };
             Program.UserSettings.TestSuiteIds = _parameters.TestSuiteIds;
 
@@ -70,6 +72,7 @@ namespace STI_Test_Report
             {
                 _parameters.ProcessType = ReadReportData.Parameters.ProcessTypes.testResults;
                 _parameters.KeepRecords = !this.deleteRecords_CheckBox.Checked;
+                _parameters.Repeats = Math.Max(1, this.repeats_ComboBox.SelectedIndex + 1);
                 if (this.batchSize_TextBox.Text.Trim() != "")
                 {
                     if (!int.TryParse(this.batchSize_TextBox.Text.Trim(), out int batchSize))

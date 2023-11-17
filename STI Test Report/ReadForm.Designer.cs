@@ -40,12 +40,14 @@
             createDB_checkBox = new CheckBox();
             readTestPoints_radioButton = new RadioButton();
             read_button = new Button();
+            repeats_ComboBox = new ComboBox();
             groupBox1.SuspendLayout();
             SuspendLayout();
             // 
             // groupBox1
             // 
             groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox1.Controls.Add(repeats_ComboBox);
             groupBox1.Controls.Add(readWorkItems_radioButton);
             groupBox1.Controls.Add(deleteRecords_CheckBox);
             groupBox1.Controls.Add(batchSize_Label);
@@ -176,6 +178,17 @@
             read_button.UseVisualStyleBackColor = true;
             read_button.Click += read_button_Click;
             // 
+            // repeats_ComboBox
+            // 
+            repeats_ComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            repeats_ComboBox.Enabled = false;
+            repeats_ComboBox.FormattingEnabled = true;
+            repeats_ComboBox.Items.AddRange(new object[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" });
+            repeats_ComboBox.Location = new Point(571, 270);
+            repeats_ComboBox.Name = "repeats_ComboBox";
+            repeats_ComboBox.Size = new Size(172, 33);
+            repeats_ComboBox.TabIndex = 10;
+            // 
             // ReadForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -208,5 +221,6 @@
         private TextBox batchSize_TextBox;
         private CheckBox deleteRecords_CheckBox;
         private RadioButton readWorkItems_radioButton;
+        private ComboBox repeats_ComboBox;
     }
 }

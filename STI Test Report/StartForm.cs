@@ -241,7 +241,8 @@ namespace STI_Test_Report
                 return;
             parameters.TestPlanId = testPlanWorkItem.Id;
 
-            await ReadReportData(parameters);
+            for (int i = 0; i < Math.Max(1, parameters.Repeats); i++)
+                await ReadReportData(parameters);
         }
         #endregion
 
