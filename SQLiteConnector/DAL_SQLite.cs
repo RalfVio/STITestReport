@@ -246,7 +246,17 @@ namespace SQLiteConnector
         public byte Rdr_DataFieldByte(int col, byte nullValue) { return Rdr_DataFieldIsNull(col) ? nullValue : _dataReader.GetByte(col); }
         public bool Rdr_DataFieldBool(int col, bool nullValue) { return Rdr_DataFieldIsNull(col) ? nullValue : _dataReader.GetInt32(col)>0; }
         public Guid Rdr_DataFieldGuid(int col, Guid NullValue) { return Rdr_DataFieldIsNull(col) ? NullValue : _dataReader.GetGuid(col); }
-        public DateTime? Rdr_DataFieldDateTime(int col) { if (Rdr_DataFieldIsNull(col)) return null; return _dataReader.GetDateTime(col); }
+        public DateTime? Rdr_DataFieldDateTime(int col) 
+        {
+            if (Rdr_DataFieldIsNull(col)) return null; 
+            
+            if(System.Text.RegularExpressions.Regex.IsMatch(_dataReader.GetString(col), "^\\d{4}-\\d{2}-\\d{2}T"))
+            {
+                var formatedDateString = _dataReader.GetString(col).Replace("-", "/").Replace("T", " ").Replace(".", ":");
+                return DateTime.Parse(formatedDateString);
+            }
+            return _dataReader.GetDateTime(col);
+        }
 
         #endregion
 
