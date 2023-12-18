@@ -52,10 +52,10 @@ jobs:
       env:
         WIX_PATH_CANDLE: "C:/Program Files (x86)/WiX Toolset v3.11/bin/candle.exe"
         WIX_PATH_LIGHT: "C:/Program Files (x86)/WiX Toolset v3.11/bin/light.exe"
+      working-directory: D:\a\STITestReport\STITestReport\Install
       run: |
-        cd "D:\a\STITestReport\STITestReport\Install"
-        "C:/Program Files (x86)/WiX Toolset v3.11/bin/candle.exe" STITestReport.wxs
-        "C:/Program Files (x86)/WiX Toolset v3.11/bin/light.exe" STITestReport.wixobj
+        '$WIX_PATH_CANDLE' STITestReport.wxs
+        '$WIX_PATH_LIGHT' STITestReport.wixobj
 
     - name: Upload binaries
       uses: actions/upload-artifact@v3
