@@ -43,10 +43,10 @@ jobs:
         Configuration: ${{ matrix.configuration }}
 
     - name: TestDirectory
-      run: dir "D:\a\STI Test Report"
+      run: dir "D:\a\STITestReport\STITestReport\STI Test Report\bin\release"
 
     - name: Upload binaries
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: D:\a\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\
+        path: D:\a\STITestReport\STITestReport\STI Test Report\bin\release\Release\net6.0-windows10.0.17763.0\
