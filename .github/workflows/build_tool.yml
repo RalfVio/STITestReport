@@ -54,8 +54,8 @@ jobs:
         WIX_PATH_LIGHT: "C:/Program Files (x86)/WiX Toolset v3.11/bin/light.exe"
       run: |
         cd "D:\a\STITestReport\STITestReport\Install"
-        "$WIX_PATH_CANDLE" STITestReport.wxs
-        "$WIX_PATH_LIGHT" STITestReport.wixobj
+        "C:/Program Files (x86)/WiX Toolset v3.11/bin/candle.exe" STITestReport.wxs
+        "C:/Program Files (x86)/WiX Toolset v3.11/bin/light.exe" STITestReport.wixobj
 
     - name: Upload binaries
       uses: actions/upload-artifact@v3
