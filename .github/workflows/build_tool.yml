@@ -48,8 +48,23 @@ jobs:
     - name: Show Directory Content
       run: dir "D:\a\STITestReport\STITestReport\STI Test Report\bin\release"
 
+    - name: Build Installer
+      env:
+        WIX_PATH_CANDLE: "C:/Program Files (x86)/WiX Toolset v3.11/bin/candle.exe"
+        WIX_PATH_LIGHT: "C:/Program Files (x86)/WiX Toolset v3.11/bin/light.exe"
+      run: |
+        cd "D:\a\STITestReport\STITestReport\Install"
+        "$WIX_PATH_CANDLE" STITestReport.wxs
+        "$WIX_PATH_LIGHT" STITestReport.wixobj
+
     - name: Upload binaries
       uses: actions/upload-artifact@v3
       with:
         name: binaries
         path: D:\a\STITestReport\STITestReport\STI Test Report\bin\release\net6.0-windows10.0.17763.0\
+
+    - name: Upload installer
+      uses: actions/upload-artifact@v3
+      with:
+        name: installer
+        path: D:\a\STITestReport\STITestReport\Install\STITestReport.msi
