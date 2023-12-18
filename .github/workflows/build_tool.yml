@@ -46,7 +46,7 @@ jobs:
       run: dotnet build --configuration Release
 
     - name: Show Directory Content
-      run: dir /s "D:\a\STITestReport\STITestReport\STI Test Report\bin"
+      run: dir "D:\a\STITestReport\STITestReport\STI Test Report\bin" /s
 
     - name: Upload binaries
       uses: actions/upload-artifact@v3
