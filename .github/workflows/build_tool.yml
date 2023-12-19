@@ -50,8 +50,11 @@ jobs:
 
     - name: Build Installer
       working-directory: D:\a\STITestReport\STITestReport\Install
-      shell: cmd
-      run: "C:\Program Files (x86)\WiX Toolset v3.11\bin\candle.exe" STITestReport.wxs
+      run: |
+         & "C:\Program Files (x86)\WiX Toolset v3.11\bin\candle.exe" STITestReport.wxs
+
+    - name: Show Directory Content
+      run: dir "D:\a\STITestReport\STITestReport\Install"
 
     - name: Upload binaries
       uses: actions/upload-artifact@v3
