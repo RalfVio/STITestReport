@@ -139,7 +139,7 @@ namespace STI_Test_Report
 
         private async Task ReadTestRuns(SQLite.BusinessObjects.TestPlan testPlan, ADORest.RestTestPlan adoRest, SQLiteConnector.BL sqlLiteBL)
         {
-            const int top = 100;
+            const int batchSize = 100;
 
             var startTime = DateTime.Now;
             var startServiceCalls = adoRest.GetServiceCalls();
@@ -154,15 +154,15 @@ namespace STI_Test_Report
             {
                 batchNumber++;
                 WriteLog?.Invoke(this, new LogEventArgs() { Message = $"Test runs, batch {batchNumber}" });
-                var testRuns = await adoRest.GetTestRuns(testPlan, skip, top);
+                var testRuns = await adoRest.GetTestRuns(testPlan, skip, batchSize);
 
                 testRunsCount = testRuns.Count;
                 skip += testRunsCount;
 
-                foreach (var testRun in testRuns)
+                foreach (var testRun in testRuns.Runs)
                     sqlLiteBL.TestRunInsert(testRun);
             }
-            while (testRunsCount == top);
+            while (testRunsCount > 0);
 
             sqlLiteBL.StatsSave("TestRuns", startTime, DateTime.Now, adoRest.GetServiceCalls() - startServiceCalls);
 
