@@ -49,11 +49,8 @@ jobs:
       run: dir "D:\a\STITestReport\STITestReport\STI Test Report\bin\release"
 
     - name: Build Installer
-      env:
-        WIX_PATH_CANDLE: C:\Program Files (x86)\WiX Toolset v3.11\bin\candle.exe
-        WIX_PATH_LIGHT: C:\Program Files (x86)\WiX Toolset v3.11\bin\light.exe
       working-directory: D:\a\STITestReport\STITestReport\Install
-      run: $WIX_PATH_CANDLE STITestReport.wxs
+      run: candle.exe STITestReport.wxs
 
     - name: Upload binaries
       uses: actions/upload-artifact@v3
