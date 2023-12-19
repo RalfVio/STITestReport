@@ -52,6 +52,7 @@ jobs:
       working-directory: D:\a\STITestReport\STITestReport\Install
       run: |
          & "C:\Program Files (x86)\WiX Toolset v3.11\bin\candle.exe" STITestReport.wxs
+         & "C:\Program Files (x86)\WiX Toolset v3.11\bin\light.exe" STITestReport.wixobj
 
     - name: Show Directory Content
       run: dir "D:\a\STITestReport\STITestReport\Install"
