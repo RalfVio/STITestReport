@@ -12,8 +12,8 @@
     <Company>Philips</Company>
     <ProductName>STI Test Report</ProductName>
     <StartupObject>STI_Test_Report.Program</StartupObject>
-	<Version>1.0.1.2</Version>
-	<FileVersion>1.0.1.2</FileVersion>
+	<Version>1.0.1.4</Version>
+	<FileVersion>1.0.1.4</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
