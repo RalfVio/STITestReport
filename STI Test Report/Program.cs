@@ -7,7 +7,9 @@ namespace STI_Test_Report
         static string _companyName = null;
         const string _appDataName = "STI Test Report";
         const string _teamProjectsFileName = "TeamProjects.txt";
-        const string _queueSubFolder = "Queue";
+        const string _userSettingsFileName = "Settings.txt";
+        const string _logSubFolder = "Logs";
+        const string _templateDB = "Template.db";
 
         /// <summary>
         ///  The main entry point for the application.
@@ -21,16 +23,16 @@ namespace STI_Test_Report
                 if (attribute is AssemblyCompanyAttribute companyAttribute)
                     _companyName = companyAttribute.Company;
             }
+
             string appDatafolder = GetApplicationDataFolder(null);
             if (!Directory.Exists(appDatafolder))
                 Directory.CreateDirectory(appDatafolder);
+            if (!Directory.Exists(GetApplicationDataFolder(_logSubFolder)))
+                Directory.CreateDirectory(GetApplicationDataFolder(_logSubFolder));
+            UserSettings= UserSettings.ReadUserSettings(GetApplicationDataFolder(_userSettingsFileName));
+            if (UserSettings == null)
+                UserSettings = new UserSettings();
 
-            //static Configuration.LocalSettings _localSettings = null;
-            //static StreamWriter _processFileWriter = null;
-
-
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             Application.Run(new StartForm());
         }
@@ -43,7 +45,20 @@ namespace STI_Test_Report
             else
                 return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), _companyName, _appDataName, subObject);
         }
+        public static string GetApplicationFolder(string subObject)
+        {
+            if (string.IsNullOrEmpty(subObject))
+                return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            else
+                return Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), subObject);
+        }
 
         public static string GetTeamProjectsFilePath() => GetApplicationDataFolder(_teamProjectsFileName);
+        public static string GetTemplateDBFilePath() => GetApplicationFolder(_templateDB);
+        public static string GetLogFolder() => GetApplicationDataFolder(_logSubFolder);
+
+        public static UserSettings UserSettings { get; set; }
+
+        public static void UserSettingsSave() => UserSettings.WriteUserSettings(GetApplicationDataFolder(_userSettingsFileName));
     }
 }

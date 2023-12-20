@@ -14,13 +14,13 @@ namespace SQLite.BusinessObjects
         public double? EstimatedEffort { get; set; }
         public string VerificationOwner { get; set; }
         public DateTime CreatedDate { get; set; }
+
         //public DateTime? StartDate { get; set; }
         //public DateTime? FinishDate { get; set; }
 
         #endregion
 
         #region Additional Properties
-
         #endregion
 
         #region GeneralFunctions
@@ -47,6 +47,7 @@ namespace SQLite.BusinessObjects
         public int Id { set; get; }
         public string WorkItemType { get; set; }
         public int Rev { get; set; }
+        public string Url { get; set; }
         public string State { get; set; }
         public string Reason { get; set; }
 
@@ -56,7 +57,7 @@ namespace SQLite.BusinessObjects
         #endregion
 
         #region Additional Properties
-
+        public string TitleId { get { return $"{Title} ({Id})"; } }
         #endregion
 
         #region GeneralFunctions

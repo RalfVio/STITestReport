@@ -200,10 +200,30 @@ namespace SQLiteConnector
 
             int recs = _sqLite.ExecuteCommand(sql);
         }
-
-        public List<int> TestRunsGetIds()
+        private List<int> TestRunsGetIds(int? batchSize)
         {
-            return _sqLite.ExecuteCommandValuesInt("select Id from TestRuns order by Id");
+            if ((batchSize ?? 0) < 1)
+                return _sqLite.ExecuteCommandValuesInt("select Id from TestRuns order by Id");
+            else
+                return _sqLite.ExecuteCommandValuesInt($"select Id from TestRuns where id not in (select RunId from TestResults) order by Id LIMIT {batchSize.Value}");
+        }
+        public List<int> TestRunsGetIds(int? batchSize, List<int> testSuiteIds)
+        {
+            if (testSuiteIds == null || testSuiteIds.Count == 0)
+                return TestRunsGetIds(batchSize);
+
+            if ((batchSize ?? 0) < 1)
+                return _sqLite.ExecuteCommandValuesInt($"select Id from TestRuns where Id in (select LastTestRunId from testPoints where testsuiteid in ({SqlIds(testSuiteIds)})) order by Id");
+            else
+                return _sqLite.ExecuteCommandValuesInt($"select Id from TestRuns where id not in (select RunId from TestResults) and id in (select LastTestRunId from testPoints where testsuiteid in ({SqlIds(testSuiteIds)})) order by Id LIMIT {batchSize.Value}");
+        }
+
+        public int TestRunsGetRemaining(List<int> testSuiteIds)
+        {
+            if (testSuiteIds == null || testSuiteIds.Count == 0)
+                return (int)_sqLite.ExecuteCommandValue("select count(*) from TestRuns where id not in (select RunId from TestResults)");
+            else
+                return (int)_sqLite.ExecuteCommandValue($"select count(*) from TestRuns where id not in (select RunId from TestResults) and id in (select LastTestRunId from testPoints where testsuiteid in ({SqlIds(testSuiteIds)}))");
         }
 
         public void TestResultsDelete()
@@ -219,7 +239,7 @@ namespace SQLiteConnector
         }
         public void TestResultInsert(TestStepResult testResult)
         {
-            string sql = "INSERT INTO TestResults (RunId,ResultId,StartedDate,CompletedDate,Revision,State,Outcome,TestCaseId,TestCaseRevision,TestCaseTitle,TestCaseStepsXML,TestPointId,BuildId,BuildName,RunBy)"
+            string sql = "INSERT INTO TestResults (RunId,ResultId,StartedDate,CompletedDate,Revision,State,Outcome,TestCaseId,TestCaseRevision,TestCaseTitle,TestCaseState,TestCaseStepsXML,TestPointId,BuildId,BuildName,RunBy)"
             + "\r\nValues"
             + "(" + DAL_SQLite.SQLInt(testResult.RunId)
             + "," + DAL_SQLite.SQLInt(testResult.ResultId)
@@ -231,6 +251,7 @@ namespace SQLiteConnector
             + "," + DAL_SQLite.SQLInt(testResult.TestCaseId)
             + "," + DAL_SQLite.SQLInt(testResult.TestCaseRevision)
             + "," + DAL_SQLite.SQLText(testResult.TestCaseTitle)
+            + "," + DAL_SQLite.SQLText(testResult.TestCaseState)
             + "," + DAL_SQLite.SQLText(testResult.TestCaseStepsXML)
             + "," + DAL_SQLite.SQLInt(testResult.TestPointId)
             + "," + DAL_SQLite.SQLInt(testResult.BuildId)
