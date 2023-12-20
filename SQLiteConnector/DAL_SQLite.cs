@@ -258,11 +258,8 @@ namespace SQLiteConnector
 
             throw new FormatException($"Unable to read date or time '{value}'");
         }
-
         #endregion
 
         #endregion
-
-
     }
 }
