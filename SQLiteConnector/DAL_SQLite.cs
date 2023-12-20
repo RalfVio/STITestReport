@@ -123,8 +123,8 @@ namespace SQLiteConnector
             if (!dDate.HasValue)
                 return "Null";
 
-            string formatDate = "yyyy-MM-dd";
-            string formatTime = "yyyy-MM-dd\\THH:mm:ss";
+            string formatDate = "yyyy\\-MM\\-dd";
+            string formatTime = "yyyy\\-MM\\-dd\\THH\\:mm\\:ss";
 
             return SQLText(dDate.Value.ToString(withTime ? formatTime : formatDate));
         }
@@ -246,22 +246,20 @@ namespace SQLiteConnector
         public byte Rdr_DataFieldByte(int col, byte nullValue) { return Rdr_DataFieldIsNull(col) ? nullValue : _dataReader.GetByte(col); }
         public bool Rdr_DataFieldBool(int col, bool nullValue) { return Rdr_DataFieldIsNull(col) ? nullValue : _dataReader.GetInt32(col)>0; }
         public Guid Rdr_DataFieldGuid(int col, Guid NullValue) { return Rdr_DataFieldIsNull(col) ? NullValue : _dataReader.GetGuid(col); }
-        public DateTime? Rdr_DataFieldDateTime(int col) 
+        public DateTime? Rdr_DataFieldDateTime(int col)
         {
-            if (Rdr_DataFieldIsNull(col)) return null; 
-            
-            if(System.Text.RegularExpressions.Regex.IsMatch(_dataReader.GetString(col), "^\\d{4}-\\d{2}-\\d{2}T"))
-            {
-                var formatedDateString = _dataReader.GetString(col).Replace("-", "/").Replace("T", " ").Replace(".", ":");
-                return DateTime.Parse(formatedDateString);
-            }
-            return _dataReader.GetDateTime(col);
+            if (Rdr_DataFieldIsNull(col)) return null;
+
+            var value = Rdr_DataFieldStr(col);
+
+            //temporary fix for time records containing '.' as separator
+            if(DateTime.TryParse(value.Replace('.',':'),out DateTime result))
+                return result;
+
+            throw new FormatException($"Unable to read date or time '{value}'");
         }
-
         #endregion
 
         #endregion
-
-
     }
 }

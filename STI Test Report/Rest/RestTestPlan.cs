@@ -230,12 +230,18 @@ namespace ADORest
 
         //    return result;
         //}
-        public async Task<List<TestRun>> GetTestRuns(TestPlan testPlan, int skip, int top)
+
+        public class TestRuns
+        {
+            public List<TestRun> Runs { get; set; }
+            public int Count { get; set; } 
+        }
+        public async Task<TestRuns> GetTestRuns(TestPlan testPlan, int skip, int top)
         {
             //https://docs.microsoft.com/en-us/rest/api/azure/devops/test/runs/list?view=azure-devops-rest-7.1
             string restUri = $"{_collectionUrl}/{_teamProject}/_apis/test/runs?planId={testPlan.Id}&includeRunDetails=true&$skip={skip}&$top={top}&api-version=7.1-preview.3";
 
-            List<TestRun> result = null;
+            TestRuns result = null;
             try
             {
                 if (_httpClient == null)
@@ -251,14 +257,18 @@ namespace ADORest
                     string responseString = await response.Content.ReadAsStringAsync();
                     dynamic resultJObject = JObject.Parse(responseString);
                     dynamic dataItemsJObject = resultJObject.value;
-                    int count = resultJObject.count;
-                    result = new List<TestRun>();
-                    for (int i = 0; i < count; i++)
+                    result = new TestRuns()
+                    {
+
+                        Runs = new List<TestRun>(),
+                        Count = resultJObject.count,
+                    };
+                    for (int i = 0; i < result.Count; i++)
                     {
                         int id = dataItemsJObject[i].id;
                         string state = dataItemsJObject[i].state;
-                        if (string.Compare(state, "255") != 0)
-                            result.Add(new TestRun()
+                        if (state != "255")
+                            result.Runs.Add(new TestRun()
                             {
                                 Id = dataItemsJObject[i].id,
                                 Revision = dataItemsJObject[i].revision,
