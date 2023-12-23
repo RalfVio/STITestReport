@@ -8,7 +8,6 @@ namespace SQLite.BusinessObjects
         #region Properties
 
         public string CRType { get; set; }
-        public string Url { get; set; }
         public string AreaPath { get; set; }
         public string IterationPath { get; set; }
         public double? EstimatedEffort { get; set; }
