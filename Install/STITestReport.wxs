@@ -8,7 +8,9 @@
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="ProgramFilesFolder">
               <Directory Id="APPLICATIONCompanyDIRECTORY" Name="Philips">
-                <Directory Id="APPLICATIONROOTDIRECTORY" Name="STI Test Report"/>
+                <Directory Id="APPLICATIONROOTDIRECTORY" Name="STI Test Report">
+                  <Directory Id="APPLICATIONDEDIRECTORY" Name="de"/>
+                </Directory>
               </Directory>
             </Directory>
 
@@ -49,9 +51,6 @@
           <Component Id="comp0006" Guid="fef2368e-c406-487f-8083-f28180566666">
                 <File Id="file0006" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\SQLiteConnector.dll" KeyPath="yes" Checksum="yes"/>
           </Component>
-          <Component Id="comp0007" Guid="f9d91ecb-5e7e-4466-b9c6-1c02a70b2251">
-                <File Id="file0007" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\SQLiteConnector.pdb" KeyPath="yes" Checksum="yes"/>
-          </Component>
           <Component Id="comp0008" Guid="1eaba3a1-1f29-435b-9dc4-78c682316f6b">
                 <File Id="file0008" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\STI Test Report.deps.json" KeyPath="yes" Checksum="yes"/>
           </Component>
@@ -73,7 +72,22 @@
           <Component Id="comp0015" Guid="ea8991aa-6bc5-440e-8a33-143eb940169e">
                 <File Id="file0015" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\runtimes\win-x64\native\SQLite.Interop.dll" KeyPath="yes" Checksum="yes"/>
           </Component>
+          <Component Id="comp0016" Guid="87ea940e-6d94-44b8-8c86-c020745177a2">
+                <File Id="file0016" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\Microsoft.Windows.SDK.NET.dll" KeyPath="yes" Checksum="yes"/>
+          </Component>
+          <Component Id="comp0017" Guid="9aaf00dB-8186-4ef1-93b2-3fb7103c171d">
+                <File Id="file0017" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\WinRT.Runtime.dll" KeyPath="yes" Checksum="yes"/>
+          </Component>
+
+
         </DirectoryRef>
+
+        <DirectoryRef Id="APPLICATIONDEDIRECTORY">
+          <Component Id="comp0200" Guid="dad5ba60-7ec3-4d32-b858-294c8a40c079">
+                <File Id="file0200" Source="..\STI Test Report\bin\Release\net6.0-windows10.0.17763.0\de\PdfSharpCore.resources.dll" KeyPath="yes" Checksum="yes"/>
+          </Component>
+        </DirectoryRef>
+
 
        <!-- Step 3: Add the shortcut to your installer package -->
         <DirectoryRef Id="ApplicationProgramsFolder">
@@ -98,7 +112,6 @@
             <ComponentRef Id="comp0004" />
             <ComponentRef Id="comp0005" />
             <ComponentRef Id="comp0006" />
-            <ComponentRef Id="comp0007" />
             <ComponentRef Id="comp0008" />
             <ComponentRef Id="comp0009" />
             <ComponentRef Id="comp0010" />
@@ -106,6 +119,11 @@
             <ComponentRef Id="comp0013" />
             <ComponentRef Id="comp0014" />
             <ComponentRef Id="comp0015" />
+            <ComponentRef Id="comp0016" />
+            <ComponentRef Id="comp0017" />
+
+            <ComponentRef Id="comp0200" />
+
              <!-- Step 5: Tell WiX to install the shortcut -->
             <ComponentRef Id="ApplicationShortcut" />
         </Feature>
