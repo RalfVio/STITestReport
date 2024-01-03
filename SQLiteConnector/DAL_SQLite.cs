@@ -121,7 +121,7 @@ namespace SQLiteConnector
         public static string SQLDate(DateTime? dDate, bool withTime)
         {
             if (!dDate.HasValue)
-                return "Null";
+                return SQLNull();
 
             string formatDate = "yyyy\\-MM\\-dd";
             string formatTime = "yyyy\\-MM\\-dd\\THH\\:mm\\:ss";
@@ -250,13 +250,21 @@ namespace SQLiteConnector
         {
             if (Rdr_DataFieldIsNull(col)) return null;
 
-            var value = Rdr_DataFieldStr(col);
+            DateTime result;
+            try
+            {
+                result= _dataReader.GetDateTime(col);
+            }
+            catch (Exception)
+            {
+                var value = Rdr_DataFieldStr(col);
 
-            //temporary fix for time records containing '.' as separator
-            if(DateTime.TryParse(value.Replace('.',':'),out DateTime result))
-                return result;
+                //temporary fix for time records containing '.' as separator
+                if (!DateTime.TryParse(value.Replace('.', ':'), out result))
+                    throw new FormatException($"Unable to read date or time '{value}'");
+            }
 
-            throw new FormatException($"Unable to read date or time '{value}'");
+            return result;
         }
         #endregion
 
