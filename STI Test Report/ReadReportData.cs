@@ -6,16 +6,20 @@ using System.Threading;
 namespace STI_Test_Report
 {
     public delegate void LogEventHandler(object sender, LogEventArgs e);
-    
+    public delegate void LogExceptionHandler(object sender, LogExeptionArgs e);
     public class LogEventArgs : EventArgs
     {
         public string Message { get; set; }
     }
-    
+    public class LogExeptionArgs : EventArgs
+    {
+        public Exception Exception { get; set; }
+    }
+
     internal class ReadReportData
     {
         public event LogEventHandler WriteLog;
-        private static SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+        public event LogExceptionHandler WriteException;
 
         #region Sub classes
         public class Parameters
@@ -51,50 +55,39 @@ namespace STI_Test_Report
             }
         }
         #endregion
-        public async static Task Start(Parameters commandFile, ADORest.RestTestPlan adoRest, TeamProject teamProject, string dbFilePath, LogEventHandler logEventHandler )
-        {
-            await _semaphore.WaitAsync();
-
-            ReadReportData readData = null;
-            try
-            {
-                readData = new ReadReportData();
-                readData.WriteLog += logEventHandler;
-                await readData.Start(commandFile, adoRest, teamProject, dbFilePath );
-            }
-            finally 
-            {
-                readData.WriteLog -= logEventHandler;
-                _semaphore.Release();
-            }
-            
-        }
 
         public async Task Start(Parameters commandFile, ADORest.RestTestPlan adoRest, TeamProject teamProject, string dbFilePath)
         {
-            if (!File.Exists(dbFilePath) || commandFile.CreateNewFile)
-                File.Copy(Program.GetTemplateDBFilePath(), dbFilePath, true);
-
-            var testPlan = await adoRest.GetTestPlan(commandFile.TestPlanId);
-
-            using var sqlLiteBL = new SQLiteConnector.BL();
-            sqlLiteBL.OpenDatabase(dbFilePath);
-            sqlLiteBL.TestPlanSave(testPlan);
-
-            switch (commandFile.ProcessType)
+            try
             {
-                case ReadReportData.Parameters.ProcessTypes.testPoints:
-                    await ReadTestPoints(testPlan, commandFile.TestSuiteIds, adoRest, sqlLiteBL);
-                    break;
-                case ReadReportData.Parameters.ProcessTypes.testRuns:
-                    await ReadTestRuns(testPlan, adoRest, sqlLiteBL);
-                    break;
-                case ReadReportData.Parameters.ProcessTypes.testResults:
-                    await ReadTestResults(testPlan, commandFile.BatchSize, commandFile.KeepRecords, commandFile.TestSuiteIds, adoRest, sqlLiteBL);
-                    break;
-                case ReadReportData.Parameters.ProcessTypes.workItems:
-                    await ReadWorkItems(testPlan, adoRest, sqlLiteBL);
-                    break;
+                if (!File.Exists(dbFilePath) || commandFile.CreateNewFile)
+                    File.Copy(Program.GetTemplateDBFilePath(), dbFilePath, true);
+
+                var testPlan = await adoRest.GetTestPlan(commandFile.TestPlanId);
+
+                using var sqlLiteBL = new SQLiteConnector.BL();
+                sqlLiteBL.OpenDatabase(dbFilePath);
+                sqlLiteBL.TestPlanSave(testPlan);
+
+                switch (commandFile.ProcessType)
+                {
+                    case ReadReportData.Parameters.ProcessTypes.testPoints:
+                        await ReadTestPoints(testPlan, commandFile.TestSuiteIds, adoRest, sqlLiteBL);
+                        break;
+                    case ReadReportData.Parameters.ProcessTypes.testRuns:
+                        await ReadTestRuns(testPlan, adoRest, sqlLiteBL);
+                        break;
+                    case ReadReportData.Parameters.ProcessTypes.testResults:
+                        await ReadTestResults(testPlan, commandFile.BatchSize, commandFile.KeepRecords, commandFile.TestSuiteIds, adoRest, sqlLiteBL);
+                        break;
+                    case ReadReportData.Parameters.ProcessTypes.workItems:
+                        await ReadWorkItems(testPlan, adoRest, sqlLiteBL);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            { 
+                WriteException?.Invoke(this, new LogExeptionArgs() { Exception=ex}); 
             }
         }
         private async Task ReadTestPoints(SQLite.BusinessObjects.TestPlan testPlan, List<int> testSuiteIds, ADORest.RestTestPlan adoRest, SQLiteConnector.BL sqlLiteBL)
@@ -193,7 +186,7 @@ namespace STI_Test_Report
             for (int i = 0; i < runIds.Count; i++)
             {
                 if (i == 0 || i == runIds.Count - 1 || (i + 1) % 25 == 0)
-                    WriteLog?.Invoke(this, new LogEventArgs() { Message = $"Test result for run {runIds[i]} ({i + 1}/{runIds.Count})" });
+                    WriteLog?.Invoke(this, new LogEventArgs() { Message = $"Test results for run {runIds[i]} ({i + 1}/{runIds.Count})" });
 
                 var testStepResults = await adoRest.GetTestStepResults(runIds[i]);
                 if (testStepResults != null)

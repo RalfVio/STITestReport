@@ -1,7 +1,6 @@
-using ADORest.BusinessObjects;
 using Newtonsoft.Json;
-using PdfSharpCore.Internal;
 using SQLite.BusinessObjects;
+using System.Windows.Forms;
 
 namespace STI_Test_Report
 {
@@ -133,10 +132,13 @@ namespace STI_Test_Report
 
             _active = false;
             testPlan_comboBox.DataSource = null;
-            if (testPlanFilter.Text == "")
-                this.testPlan_comboBox.DataSource = _testPlans;
-            else
-                this.testPlan_comboBox.DataSource = _testPlans.Where(tp => tp.Title.Contains(testPlanFilter.Text, StringComparison.CurrentCultureIgnoreCase) || tp.Id.ToString() == testPlanFilter.Text).ToList();
+            if (_testPlans != null)
+            {
+                if (testPlanFilter.Text == "")
+                    this.testPlan_comboBox.DataSource = _testPlans;
+                else
+                    this.testPlan_comboBox.DataSource = _testPlans.Where(tp => tp.Title.Contains(testPlanFilter.Text, StringComparison.CurrentCultureIgnoreCase) || tp.Id.ToString() == testPlanFilter.Text).ToList();
+            }
             testPlan_comboBox.DisplayMember = "TitleId";
             testPlan_comboBox.ValueMember = "Id";
             this.testPlan_comboBox.SelectedIndex = -1;
@@ -265,7 +267,10 @@ namespace STI_Test_Report
             {
                 readData = new ReadReportData();
                 readData.WriteLog += WriteStatus;
-                await readData.Start(parameters, _adoRest, teamProject, DBFilePath());
+                readData.WriteException += WriteException;
+
+                await Task.Run(() => readData.Start(parameters, _adoRest, teamProject, DBFilePath()));
+                //await readData.Start(parameters, _adoRest, teamProject, DBFilePath());
             }
             catch (Exception ex)
             {
@@ -274,9 +279,11 @@ namespace STI_Test_Report
             finally
             {
                 readData.WriteLog -= WriteStatus;
+                readData.WriteException -= WriteException;
                 _logWriter.WriteLine(new string('-', 80));
                 _logWriter.Flush(); _logWriter.Dispose(); _logWriter = null;
                 this.Cursor = Cursors.Default;
+                this.print_button.Enabled = true;
                 _semaphore.Release();
             }
         }
@@ -415,12 +422,17 @@ namespace STI_Test_Report
         #endregion
 
         #region Logging
-        private void WriteStatus(string message)
+       
+        private void WriteStatus(object sender, LogEventArgs e)
         {
-            this.status_toolStripStatusLabel.Text = message;
-            WriteLog(message);
+            this.status_toolStripStatusLabel.Text = e.Message;
+            WriteLog(e.Message);
         }
-        private void WriteStatus(object sender, LogEventArgs e) => WriteStatus(e.Message);
+        private void WriteException(object sender, LogExeptionArgs e)
+        {
+            this.status_toolStripStatusLabel.Text = $"Error: {e.Exception.Message}";
+            WriteLog(e.Exception);
+        }
 
         int _logMsgNo = 0;
         StreamWriter _logWriter = null;
