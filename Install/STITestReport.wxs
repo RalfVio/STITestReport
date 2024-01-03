@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="*" UpgradeCode="5d73121e-d42b-4545-a503-8b622e22e837" Version="1.0.0.0" Language="1033" Name="STI Test Report" Manufacturer="Philips">
-        <Package InstallerVersion="300" Compressed="yes"/>
+    <Product Id="A5F43D9E-5589-4CE0-9B40-BDFFD687106D" UpgradeCode="5d73121e-d42b-4545-a503-8b622e22e837" Version="1.0.0.0" Language="1033" Name="STI Test Report" Manufacturer="Philips">
+      <Package Id='*' InstallerVersion="300" Compressed="yes"/>
         <Media Id="1" Cabinet="STITestReport.cab" EmbedCab="yes" />
 
         <!-- Step 1: Define the directory structure -->
