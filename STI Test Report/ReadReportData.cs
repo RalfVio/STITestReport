@@ -197,17 +197,18 @@ namespace STI_Test_Report
                         else
                             await adoRest.GetTestCaseData(testResult, testResult.StartedDate);
                         var testSteps = testResult.GetTestCaseSteps();
-                        foreach (var testStep in testSteps)
-                        {
-                            if (testStep.TypeOfStep == SQLite.BusinessObjects.Step.TypesOfStep.SharedStepsRef
-                                && (testResult.SharedSteps == null || !testResult.SharedSteps.Exists(st => st.Id == testStep.SharedStepsId)))
+                        if (testSteps != null)
+                            foreach (var testStep in testSteps)
                             {
-                                var sharedSteps = await adoRest.GetSharedStepsData(testStep.SharedStepsId, testResult.StartedDate, testStep.Id);
-                                if (testResult.SharedSteps == null)
-                                    testResult.SharedSteps = new List<SQLite.BusinessObjects.SharedSteps>();
-                                testResult.SharedSteps.Add(sharedSteps);
+                                if (testStep.TypeOfStep == SQLite.BusinessObjects.Step.TypesOfStep.SharedStepsRef
+                                    && (testResult.SharedSteps == null || !testResult.SharedSteps.Exists(st => st.Id == testStep.SharedStepsId)))
+                                {
+                                    var sharedSteps = await adoRest.GetSharedStepsData(testStep.SharedStepsId, testResult.StartedDate, testStep.Id);
+                                    if (testResult.SharedSteps == null)
+                                        testResult.SharedSteps = new List<SQLite.BusinessObjects.SharedSteps>();
+                                    testResult.SharedSteps.Add(sharedSteps);
+                                }
                             }
-                        }
 
                         sqlLiteBL.TestResultInsert(testResult);
                     }
