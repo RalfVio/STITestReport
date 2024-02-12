@@ -38,6 +38,7 @@
             notApplicable_checkBox = new CheckBox();
             notRun_checkBox = new CheckBox();
             create_Button = new Button();
+            writeLogFile_checkBox = new CheckBox();
             testPlans_groupBox.SuspendLayout();
             SuspendLayout();
             // 
@@ -56,7 +57,7 @@
             testPlans_groupBox.Margin = new Padding(4, 5, 4, 5);
             testPlans_groupBox.Name = "testPlans_groupBox";
             testPlans_groupBox.Padding = new Padding(4, 5, 4, 5);
-            testPlans_groupBox.Size = new Size(782, 257);
+            testPlans_groupBox.Size = new Size(782, 279);
             testPlans_groupBox.TabIndex = 2;
             testPlans_groupBox.TabStop = false;
             testPlans_groupBox.Text = " ";
@@ -150,11 +151,22 @@
             create_Button.UseVisualStyleBackColor = true;
             create_Button.Click += Create_Button_Click;
             // 
+            // writeLogFile_checkBox
+            // 
+            writeLogFile_checkBox.AutoSize = true;
+            writeLogFile_checkBox.Location = new Point(49, 354);
+            writeLogFile_checkBox.Name = "writeLogFile_checkBox";
+            writeLogFile_checkBox.Size = new Size(139, 29);
+            writeLogFile_checkBox.TabIndex = 15;
+            writeLogFile_checkBox.Text = "Write log file";
+            writeLogFile_checkBox.UseVisualStyleBackColor = true;
+            // 
             // ReportOptionsForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(822, 413);
+            Controls.Add(writeLogFile_checkBox);
             Controls.Add(create_Button);
             Controls.Add(testPlans_groupBox);
             MaximizeBox = false;
@@ -166,6 +178,7 @@
             testPlans_groupBox.ResumeLayout(false);
             testPlans_groupBox.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -180,5 +193,6 @@
         private CheckBox notApplicable_checkBox;
         private CheckBox notRun_checkBox;
         private Button create_Button;
+        private CheckBox writeLogFile_checkBox;
     }
 }

@@ -313,6 +313,17 @@ namespace SQLite.BusinessObjects
 
             return result.ToString();
         }
+        public bool IsPassedOrFailed()
+        {
+            switch (Outcome)
+            {
+                case "Passed":
+                case "Failed":
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 
     public class TestResultIteration

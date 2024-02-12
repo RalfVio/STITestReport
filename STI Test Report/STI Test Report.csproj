@@ -8,12 +8,12 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <Authors>Bhakthavathsala R B, Ralf Viola</Authors>
-    <Copyright>©Philips 2023</Copyright>
+    <Copyright>©Philips 2024</Copyright>
     <Company>Philips</Company>
     <ProductName>STI Test Report</ProductName>
     <StartupObject>STI_Test_Report.Program</StartupObject>
-	  <Version>1.0.1.5</Version>
-	  <FileVersion>1.0.1.5</FileVersion>
+	  <Version>1.0.2.0</Version>
+	  <FileVersion>1.0.2.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

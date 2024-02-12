@@ -184,10 +184,14 @@ namespace STI_Test_Report
                 return;
 
             _reportFileName = pdf_SaveFileDialog.FileName;
+            string logFilePath = Path.GetDirectoryName(_reportFileName) + "\\" + Path.GetFileNameWithoutExtension(_reportFileName) + ".txt";
+
             try
             {
                 if (File.Exists(_reportFileName))
                     File.Delete(_reportFileName);
+                if (File.Exists(logFilePath))
+                    File.Delete(logFilePath);
             }
             catch { this.status_toolStripStatusLabel.Text = "File is locked."; return; }
 
@@ -196,7 +200,7 @@ namespace STI_Test_Report
 
             this.Cursor = Cursors.WaitCursor;
 
-            await Task.Run(() => CreateReport(_reportFileName, dbFilePath, reportOptions));
+            await Task.Run(() => CreateReport(_reportFileName, logFilePath, dbFilePath, reportOptions));
 
             this.open_linkLabel.Visible = File.Exists(_reportFileName);
             this.status_toolStripStatusLabel.Text = "Done";
@@ -297,12 +301,14 @@ namespace STI_Test_Report
             if (!enable)
                 this.open_linkLabel.Visible = false;
         }
-        void CreateReport(string pdfFilePath, string dbFilePath, ReportOptionsForm.ReportOptions reportOptions)
+        void CreateReport(string pdfFilePath, string logFilePath, string dbFilePath, ReportOptionsForm.ReportOptions reportOptions)
         {
             var sqlLiteBL = new SQLiteConnector.BL();
             sqlLiteBL.OpenDatabase(dbFilePath);
             var testPlan = sqlLiteBL.TestPlanRead();
             var pdfReport = new OutPdf.PdfSTITestReport();
+
+            Dictionary<int, OutPdf.PdfSTITestReport.TestPointStatus> testPointStati = new();
 
             pdfReport.PrintStart(testPlan, 1, true);
 
@@ -338,13 +344,22 @@ namespace STI_Test_Report
                     if (reportOptions.NoTestResults)
                         continue;
 
+                    testPointStati.Add(testPoint.Id, new OutPdf.PdfSTITestReport.TestPointStatus() { TestCaseId = testPoint.TestCaseId, PageNumber = pdfReport.GetPageNumber(), NotRun = testPoint.LastTestRunId <= 0 });
+
                     var testResults = sqlLiteBL.TestResultsRead(testPoint, reportOptions.LastTestRun ? testPoint.LastTestRunId : (int?)null);
                     foreach (var testResult in testResults)
                     {
                         pdfReport.Print(testResult, null);
+
+                        testPointStati[testPoint.Id].RunId = testResult.RunId;
+                        if (testResult.TestCaseState != "Approved")
+                            testPointStati[testPoint.Id].TestCaseNotApproved = true;
+
                         if (!reportOptions.NoTestSteps)
                         {
                             var steps = testResult.GetTestCaseSteps();
+                            if (steps == null || steps.Count == 0 || testResult.Iterations == null)
+                                testPointStati[testPoint.Id].NoTestSteps = true;
                             if (testResult.Iterations != null)
                                 foreach (var iteration in testResult.Iterations)
                                 {
@@ -358,6 +373,8 @@ namespace STI_Test_Report
                                                 var actionResult = actionResults.Where(ar => ar.StepIdentifier == step.GetStepIdentifier()).FirstOrDefault();
                                                 step.Outcome = (actionResult == null ? "" : actionResult.Outcome);
                                                 step.Comment = (actionResult == null ? "" : actionResult.ErrorMessage);
+                                                if (!step.IsPassedOrFailed())
+                                                    testPointStati[testPoint.Id].NoTestSteps = true;
 
                                                 if (parameterResults != null)
                                                     step.Parameters = parameterResults.Where(ar => ar.StepIdentifier == step.GetStepIdentifier()).ToList();
@@ -377,6 +394,8 @@ namespace STI_Test_Report
                                                         var sharedStepsActionResult = actionResults.Where(ar => ar.StepIdentifier == sharedStepsStep.GetStepIdentifier()).FirstOrDefault();
                                                         sharedStepsStep.Outcome = (sharedStepsActionResult == null ? "" : sharedStepsActionResult.Outcome);
                                                         sharedStepsStep.Comment = (sharedStepsActionResult == null ? "" : sharedStepsActionResult.ErrorMessage);
+                                                        if (!sharedStepsStep.IsPassedOrFailed())
+                                                            testPointStati[testPoint.Id].NoTestSteps = true;
                                                         pdfReport.Print(sharedStepsStep);
                                                     }
                                                 }
@@ -409,6 +428,32 @@ namespace STI_Test_Report
                 fs.Close();
             }
 
+            if (reportOptions.WriteLogFile)
+                using (var sw = new StreamWriter(logFilePath, false, System.Text.Encoding.UTF8))
+                {
+                    sw.WriteLine($"Test Plan:\t{testPlan.TitleId}\r\n");
+                    int total = testPointStati.Count();
+                    sw.WriteLine($"Total test points:\t{total}");
+                    int count = testPointStati.Count(tp => tp.Value.TestIsOk() && !tp.Value.NotRun);
+                    sw.WriteLine($"Correct:\t{count} {((double)count / total):P1}");
+                    count = testPointStati.Count(tp => !tp.Value.TestIsOk() && !tp.Value.NotRun);
+                    sw.WriteLine($"Incorrect:\t{count} {((double)count / total):P1}");
+                    count = testPointStati.Count(tp => tp.Value.TestCaseNotApproved && !tp.Value.NotRun);
+                    sw.WriteLine($"  TC not approved:\t{count} {((double)count / total):P1}");
+                    count = testPointStati.Count(tp => tp.Value.NoTestSteps && !tp.Value.NotRun);
+                    sw.WriteLine($"  No step details:\t{count} {((double)count / total):P1}");
+                    count = testPointStati.Count(tp => tp.Value.NotRun);
+                    sw.WriteLine($"Active:\t{count} {((double)count / total):P1}");
+
+                    sw.WriteLine($"\r\nErrors:");
+                    sw.WriteLine($"\r\nRun Id\tTest Case Id\tPage\tError");
+                    foreach (var id in testPointStati.Keys)
+                    {
+                        var testPointStatus = testPointStati[id];
+                        if (!testPointStatus.TestIsOk())
+                            sw.WriteLine($"{(testPointStatus.RunId<=0?"":testPointStatus.RunId.ToString())}\t{testPointStatus.TestCaseId}\t{testPointStatus.PageNumber}\t{testPointStatus.ErrorMessage()}");
+                    }
+                }
         }
 
 

@@ -13,6 +13,8 @@ namespace STI_Test_Report
         public bool OptionNoTestSteps { get; set; }
 
         public List<int> TestSuiteIds { get; set; }
+        public bool WriteLogFile { get; set; }
+
         public string GetTestSuiteIds()
         {
             if (TestSuiteIds == null || TestSuiteIds.Count == 0)
