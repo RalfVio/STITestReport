@@ -54,6 +54,34 @@ namespace STI_Test_Report.OutPdf
         eLastPrinted lastPrinted = eLastPrinted.first;
 
         bool _showFullReport = true;
+
+        public class TestPointStatus
+        {
+            public int RunId { get; set; }
+            public int TestCaseId { get; set; }
+            public int PageNumber { get; set; }
+            public bool TestCaseNotApproved { get; set; }
+            public bool NoTestSteps { get; set; }
+            public bool NotRun { get; set; }
+
+            public string ErrorMessage()
+            {
+                string result = null;
+                if (TestCaseNotApproved)
+                    result = (result == null ? "" : result+", ") 
+                        + "tc not approved";
+                if (NoTestSteps)
+                    result = (result == null ? "" : result + ", ")
+                        + "no steps";
+                if (NotRun)
+                    result = (result == null ? "" : result + ", ")
+                        + "active";
+
+                return result;
+            }
+            public bool TestIsOk() => !(TestCaseNotApproved || NoTestSteps || NotRun);
+        }
+
         public void PrintStart(TestPlan testPlan, int suiteMaxLevelInContentList, bool showFullReport)
         {
             _testPlan = testPlan; _suiteMaxLevelInContentList=suiteMaxLevelInContentList;
@@ -549,6 +577,7 @@ namespace STI_Test_Report.OutPdf
 
             return result;
         }
+        public int GetPageNumber() => _doc.PageCount;
 
         PdfPage _actualPage = null;
         void CreatePage()

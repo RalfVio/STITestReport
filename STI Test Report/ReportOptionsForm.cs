@@ -15,6 +15,7 @@
             this.noTestResults_checkBox.Checked = Program.UserSettings.OptionNoTestResults;
             this.noTestSteps_checkBox.Checked = Program.UserSettings.OptionNoTestSteps;
             this.testSuite_TextBox.Text = Program.UserSettings.GetTestSuiteIds() ?? "";
+            this.writeLogFile_checkBox.Checked = Program.UserSettings.WriteLogFile;
         }
 
         public class ReportOptions
@@ -24,6 +25,7 @@
             public bool LastTestRun { get; set; }
             public bool NoTestResults { get; set; }
             public bool NoTestSteps { get; set; }
+            public bool WriteLogFile { get; set; }
             public List<int> TestSuiteIds { get; set; }
 
         }
@@ -51,6 +53,7 @@
                 NoTestResults = this.noTestResults_checkBox.Checked,
                 NoTestSteps = this.noTestSteps_checkBox.Checked,
                 TestSuiteIds = testSuiteIds,
+                WriteLogFile = this.writeLogFile_checkBox.Checked,
             };
 
             Program.UserSettings.OptionNotRun = _reportOptions.NotRun;
@@ -59,6 +62,7 @@
             Program.UserSettings.OptionNoTestResults = _reportOptions.NoTestResults;
             Program.UserSettings.OptionNoTestSteps = _reportOptions.NoTestSteps;
             Program.UserSettings.TestSuiteIds = _reportOptions.TestSuiteIds;
+            Program.UserSettings.WriteLogFile = _reportOptions.WriteLogFile;
 
             DialogResult = DialogResult.OK;
         }
