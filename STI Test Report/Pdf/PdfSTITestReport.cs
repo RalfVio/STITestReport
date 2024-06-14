@@ -59,7 +59,9 @@ namespace STI_Test_Report.OutPdf
         {
             public int RunId { get; set; }
             public int TestCaseId { get; set; }
+            public string TestCaseTitle { get; set; }
             public int PageNumber { get; set; }
+            public string SuitePath { get; set; }
             public bool TestCaseNotApproved { get; set; }
             public bool NoTestSteps { get; set; }
             public bool NotRun { get; set; }
