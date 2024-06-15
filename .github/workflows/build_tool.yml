@@ -48,14 +48,14 @@ jobs:
     - name: Show Directory Content
       run: dir "D:\a\STITestReport\STITestReport\STI Test Report\bin\release"
     
-    - name: Show Directory Content fof Program Files (x86)
+    - name: Show Directory Content for Program Files (x86)
       run: dir "C:\Program Files (x86)"
 
     - name: Build Installer
       working-directory: D:\a\STITestReport\STITestReport\Install
       run: |
-         & "C:\Program Files (x86)\WiX Toolset v3.11\bin\candle.exe" STITestReport.wxs
-         & "C:\Program Files (x86)\WiX Toolset v3.11\bin\light.exe" STITestReport.wixobj
+         & "C:\Program Files (x86)\WiX Toolset v3.14\bin\candle.exe" STITestReport.wxs
+         & "C:\Program Files (x86)\WiX Toolset v3.14\bin\light.exe" STITestReport.wixobj
 
     - name: Show Directory Content
       run: dir "D:\a\STITestReport\STITestReport\Install"
