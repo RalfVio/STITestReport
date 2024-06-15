@@ -304,7 +304,7 @@ namespace STI_Test_Report
         void CreateReport(string pdfFilePath, string logFilePath, string dbFilePath, ReportOptionsForm.ReportOptions reportOptions)
         {
             var sqlLiteBL = new SQLiteConnector.BL();
-            sqlLiteBL.OpenDatabase(dbFilePath);
+            sqlLiteBL.OpenDatabase(dbFilePath, true);
             var testPlan = sqlLiteBL.TestPlanRead();
             var pdfReport = new OutPdf.PdfSTITestReport();
 
@@ -344,7 +344,13 @@ namespace STI_Test_Report
                     if (reportOptions.NoTestResults)
                         continue;
 
-                    testPointStati.Add(testPoint.Id, new OutPdf.PdfSTITestReport.TestPointStatus() { TestCaseId = testPoint.TestCaseId, PageNumber = pdfReport.GetPageNumber(), NotRun = testPoint.LastTestRunId <= 0 });
+                    testPointStati.Add(testPoint.Id, new OutPdf.PdfSTITestReport.TestPointStatus() { 
+                        TestCaseId = testPoint.TestCaseId,
+                        TestCaseTitle=testPoint.TestCaseTitle,
+                        SuitePath = testSuite.SuitePath,
+                        PageNumber = pdfReport.GetPageNumber(),
+                        NotRun = testPoint.LastTestRunId <= 0 
+                    });
 
                     var testResults = sqlLiteBL.TestResultsRead(testPoint, reportOptions.LastTestRun ? testPoint.LastTestRunId : (int?)null);
                     foreach (var testResult in testResults)
@@ -432,8 +438,11 @@ namespace STI_Test_Report
                 using (var sw = new StreamWriter(logFilePath, false, System.Text.Encoding.UTF8))
                 {
                     sw.WriteLine($"Test Plan:\t{testPlan.TitleId}\r\n");
+                    sw.WriteLine("Total test points:");
+                    sw.WriteLine("Not applicable::");
+
                     int total = testPointStati.Count();
-                    sw.WriteLine($"Total test points:\t{total}");
+                    sw.WriteLine($"Selected test points:\t{total}");
                     int count = testPointStati.Count(tp => tp.Value.TestIsOk() && !tp.Value.NotRun);
                     sw.WriteLine($"Correct:\t{count} {((double)count / total):P1}");
                     count = testPointStati.Count(tp => !tp.Value.TestIsOk() && !tp.Value.NotRun);
@@ -443,15 +452,15 @@ namespace STI_Test_Report
                     count = testPointStati.Count(tp => tp.Value.NoTestSteps && !tp.Value.NotRun);
                     sw.WriteLine($"  No step details:\t{count} {((double)count / total):P1}");
                     count = testPointStati.Count(tp => tp.Value.NotRun);
-                    sw.WriteLine($"Active:\t{count} {((double)count / total):P1}");
+                    sw.WriteLine($"Not run:\t{count} {((double)count / total):P1}");
 
-                    sw.WriteLine($"\r\nErrors:");
-                    sw.WriteLine($"\r\nRun Id\tTest Case Id\tPage\tError");
+                    sw.WriteLine($"\r\n\r\nErrors:");
+                    sw.WriteLine($"\r\nRun Id\tTest Case Id\tTitle\tSuite\tPage\tError");
                     foreach (var id in testPointStati.Keys)
                     {
                         var testPointStatus = testPointStati[id];
                         if (!testPointStatus.TestIsOk())
-                            sw.WriteLine($"{(testPointStatus.RunId<=0?"":testPointStatus.RunId.ToString())}\t{testPointStatus.TestCaseId}\t{testPointStatus.PageNumber}\t{testPointStatus.ErrorMessage()}");
+                            sw.WriteLine($"{(testPointStatus.RunId<=0?"":testPointStatus.RunId.ToString())}\t{testPointStatus.TestCaseId}\t{testPointStatus.TestCaseTitle}\t{testPointStatus.SuitePath}\t{testPointStatus.PageNumber}\t{testPointStatus.ErrorMessage()}");
                     }
                 }
         }

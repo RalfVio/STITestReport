@@ -26,6 +26,8 @@ namespace SQLite.BusinessObjects
         public int TestPointId { get; set; }
         public string TestCaseStepsXML { get; set; }
         public string TestCaseState { get; set; }
+        public string TestCaseDescription { get; set; }
+        public string TestCaseDescriptionText { get { return HTML.HtmlDecode(TestCaseDescription); } }
         public bool HasSharedSteps { get; set; }
         public string Comment { get; set; }
 
@@ -77,7 +79,8 @@ namespace SQLite.BusinessObjects
             try
             {
                 var result = new List<Step>();
-                Step currentStep = null; string currentElement = null;
+                Step currentStep = null;
+                var nodeHierarchy = new List<string>();
 
                 using (TextReader xmlReader = new StringReader(TestCaseStepsXML))
                 using (var reader = System.Xml.XmlReader.Create(xmlReader))
@@ -87,7 +90,11 @@ namespace SQLite.BusinessObjects
                         switch (reader.NodeType)
                         {
                             case System.Xml.XmlNodeType.Element:
-                                currentElement = reader.Name;
+                                
+                                while (nodeHierarchy.Count>0 && nodeHierarchy.Count > reader.Depth)
+                                    nodeHierarchy.RemoveAt(nodeHierarchy.Count - 1);
+                                nodeHierarchy.Add(reader.Name);
+
                                 if (string.Compare(reader.Name, "Step", true) == 0)
                                 {
                                     currentStep = new Step(); result.Add(currentStep);
@@ -114,30 +121,41 @@ namespace SQLite.BusinessObjects
                                         currentStep.TypeOfStep = Step.TypesOfStep.SharedStepsRef;
                                     }
                                 }
-                                break;
-
-
-                            case System.Xml.XmlNodeType.Text:
-                                if (currentStep != null && string.Compare(currentElement, "ParameterizedString", true) == 0)
+                                else if (string.Compare(reader.Name, "ParameterizedString", true)==0 && nodeHierarchy.Count() == 3 && currentStep != null)
                                 {
+                                    currentStep.PSNumber++;
+
                                     switch (currentStep.PSNumber)
                                     {
-                                        case 0:
-                                            currentStep.Instructions = reader.Value;
-                                            currentStep.PSNumber++;
-                                            break;
                                         case 1:
-                                            currentStep.ExpectedResult = reader.Value;
-                                            currentStep.PSNumber++;
+                                            if (!string.IsNullOrEmpty(reader.Value))
+                                                currentStep.Instructions = reader.Value;
                                             break;
-                                        default:
-                                            throw new NotImplementedException($"Step has {currentStep.PSNumber} paramaterized strings (more than 2)");
+                                        case 2:
+                                            if (!string.IsNullOrEmpty(reader.Value))
+                                                currentStep.ExpectedResult = reader.Value;
+                                            break;
                                     }
                                 }
                                 break;
 
-                            case System.Xml.XmlNodeType.EndElement:
-                                currentElement = null;
+
+                            case System.Xml.XmlNodeType.Text:
+                                if ( nodeHierarchy.Count > 2 && string.Compare(nodeHierarchy[2], "ParameterizedString", true) == 0 && currentStep != null)
+                                {
+                                    switch (currentStep.PSNumber)
+                                    {
+                                        case 1:
+                                            if (!string.IsNullOrEmpty(reader.Value))
+                                                currentStep.Instructions = reader.Value;
+                                            break;
+
+                                        case 2:
+                                            if (!string.IsNullOrEmpty(reader.Value))
+                                                currentStep.ExpectedResult = reader.Value;
+                                            break;
+                                    }
+                                }
                                 break;
                         }
                     }
@@ -166,7 +184,8 @@ namespace SQLite.BusinessObjects
             try
             {
                 var result = new List<Step>();
-                Step currentStep = null; string currentElement = null;
+                Step currentStep = null;
+                var nodeHierarchy = new List<string>();
 
                 using (TextReader xmlReader = new StringReader(SharedStepsXML))
                 using (var reader = System.Xml.XmlReader.Create(xmlReader))
@@ -176,7 +195,10 @@ namespace SQLite.BusinessObjects
                         switch (reader.NodeType)
                         {
                             case System.Xml.XmlNodeType.Element:
-                                currentElement = reader.Name;
+                                while (nodeHierarchy.Count > 0 && nodeHierarchy.Count > reader.Depth)
+                                    nodeHierarchy.RemoveAt(nodeHierarchy.Count - 1);
+                                nodeHierarchy.Add(reader.Name);
+
                                 if (string.Compare(reader.Name, "Step", true) == 0)
                                 {
                                     currentStep = new Step() { TypeOfStep = Step.TypesOfStep.TestStepInSharedSteps, StepNumber = sharedStepRef.StepNumber, Id = sharedStepRef.Id }; result.Add(currentStep);
@@ -188,30 +210,41 @@ namespace SQLite.BusinessObjects
                                             currentStep.SharedStepsId = sharedStepsId;
                                     }
                                 }
-                                break;
-
-
-                            case System.Xml.XmlNodeType.Text:
-                                if (currentStep != null && string.Compare(currentElement, "ParameterizedString", true) == 0)
+                                else if (string.Compare(reader.Name, "ParameterizedString", true) == 0 && nodeHierarchy.Count() == 3 && currentStep != null)
                                 {
+                                    currentStep.PSNumber++;
+
                                     switch (currentStep.PSNumber)
                                     {
-                                        case 0:
-                                            currentStep.Instructions = reader.Value;
-                                            currentStep.PSNumber++;
-                                            break;
                                         case 1:
-                                            currentStep.ExpectedResult = reader.Value;
-                                            currentStep.PSNumber++;
+                                            if (!string.IsNullOrEmpty(reader.Value))
+                                                currentStep.Instructions = reader.Value;
                                             break;
-                                        default:
-                                            throw new NotImplementedException($"Step has {currentStep.PSNumber} paramaterized strings (more than 2)");
+                                        case 2:
+                                            if (!string.IsNullOrEmpty(reader.Value))
+                                                currentStep.ExpectedResult = reader.Value;
+                                            break;
                                     }
                                 }
                                 break;
 
-                            case System.Xml.XmlNodeType.EndElement:
-                                currentElement = null;
+
+                            case System.Xml.XmlNodeType.Text:
+                                if (nodeHierarchy.Count > 2 && string.Compare(nodeHierarchy[2], "ParameterizedString", true) == 0 && currentStep != null)
+                                {
+                                    switch (currentStep.PSNumber)
+                                    {
+                                        case 1:
+                                            if (!string.IsNullOrEmpty(reader.Value))
+                                                currentStep.Instructions = reader.Value;
+                                            break;
+
+                                        case 2:
+                                            if (!string.IsNullOrEmpty(reader.Value))
+                                                currentStep.ExpectedResult = reader.Value;
+                                            break;
+                                    }
+                                }
                                 break;
                         }
                     }
