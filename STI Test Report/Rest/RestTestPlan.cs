@@ -429,6 +429,7 @@ namespace ADORest
                     testStepResult.TestCaseStepsXML = fieldsJObject["Microsoft.VSTS.TCM.Steps"] ?? "";
                     testStepResult.TestCaseState = fieldsJObject["System.State"] ?? "";
                     testStepResult.TestCaseRevision = resultJObject.rev;
+                    testStepResult.TestCaseDescription = fieldsJObject["System.Description"] ?? "";
                 }
 
             }
@@ -461,6 +462,7 @@ namespace ADORest
 
                     testStepResult.TestCaseStepsXML = fieldsJObject["Microsoft.VSTS.TCM.Steps"] ?? "";
                     testStepResult.TestCaseState = fieldsJObject["System.State"] ?? "";
+                    testStepResult.TestCaseDescription = fieldsJObject["System.Description"] ?? "";
                 }
 
             }

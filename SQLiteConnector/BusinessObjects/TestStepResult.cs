@@ -26,6 +26,8 @@ namespace SQLite.BusinessObjects
         public int TestPointId { get; set; }
         public string TestCaseStepsXML { get; set; }
         public string TestCaseState { get; set; }
+        public string TestCaseDescription { get; set; }
+        public string TestCaseDescriptionText { get { return HTML.HtmlDecode(TestCaseDescription); } }
         public bool HasSharedSteps { get; set; }
         public string Comment { get; set; }
 

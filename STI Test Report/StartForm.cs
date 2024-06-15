@@ -304,7 +304,7 @@ namespace STI_Test_Report
         void CreateReport(string pdfFilePath, string logFilePath, string dbFilePath, ReportOptionsForm.ReportOptions reportOptions)
         {
             var sqlLiteBL = new SQLiteConnector.BL();
-            sqlLiteBL.OpenDatabase(dbFilePath);
+            sqlLiteBL.OpenDatabase(dbFilePath, true);
             var testPlan = sqlLiteBL.TestPlanRead();
             var pdfReport = new OutPdf.PdfSTITestReport();
 

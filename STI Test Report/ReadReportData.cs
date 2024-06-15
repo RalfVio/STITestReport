@@ -66,7 +66,7 @@ namespace STI_Test_Report
                 var testPlan = await adoRest.GetTestPlan(commandFile.TestPlanId);
 
                 using var sqlLiteBL = new SQLiteConnector.BL();
-                sqlLiteBL.OpenDatabase(dbFilePath);
+                sqlLiteBL.OpenDatabase(dbFilePath, true);
                 sqlLiteBL.TestPlanSave(testPlan);
 
                 switch (commandFile.ProcessType)

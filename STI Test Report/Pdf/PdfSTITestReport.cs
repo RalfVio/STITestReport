@@ -209,46 +209,27 @@ namespace STI_Test_Report.OutPdf
             _page.DrawString("TC State:", font1, XBrushes.Black, xTab2Label, _yPos); if(!string.IsNullOrEmpty(testResult.TestCaseState)) _page.DrawString(testResult.TestCaseState, font1, XBrushes.Black, xTab2Data, _yPos);
 
             _page.DrawString("Outcome:", font1, XBrushes.Black, xTabOutcome - 1, _yPos, new XStringFormat() { Alignment = XStringAlignment.Far, LineAlignment = XLineAlignment.BaseLine });_page.DrawString(testResult.OutcomeExternal(), font1, XBrushes.Black, xTabOutcome, _yPos);
-            var equipmentRecords = testResult.EquipmentRecordsGet(", ");
-            if (equipmentRecords != null)
+
+            string description = testResult.TestCaseDescriptionText;
+            if (!string.IsNullOrEmpty(description))
             {
-                foreach (var record in equipmentRecords)
+                NewLine(deltaY,10);
+                _page.DrawString("Prerequisites:", font1, XBrushes.Black, xTab1Label, _yPos);
+                var descriptionLines=SplitToMultiLine(description, xPageRight - xTab1Data - 2, xPageRight - xTab1Data - 2, 25, ref font1, ' ');
+                for (int i=0;i<descriptionLines.Count;i++)
                 {
-                    double xTab1EquipmentRecord = xTab1Label + _page.MeasureString(record.Title + ":", font1).Width + 2;
-                    double xTab1EquipmentRecord2 = xTab1Label + 10;
-                    var lines = SplitToMultiLine(record.Description, xPageRight - xTab1EquipmentRecord2 - 2, xPageRight - xTab1EquipmentRecord - 2, 25, ref font1, ',');
-                    NewLine();
-                    _page.DrawString($"{record.Title}:", font1, XBrushes.Black, xTab1Label, _yPos);
-                    _page.DrawString(lines[0], font1, XBrushes.Black, xTab1EquipmentRecord, _yPos);
-                    for (int i = 1; i < lines.Count; i++)
-                    { NewLine(); _page.DrawString(lines[i].TrimStart(), font1, XBrushes.Black, xTab1EquipmentRecord2, _yPos); }
+                    //ignore last line if empty
+                    if (i == descriptionLines.Count - 1 && string.IsNullOrWhiteSpace(descriptionLines[i]))
+                        break;
+
+                    if (i > 0)
+                        NewLine();
+
+                    _page.DrawString(descriptionLines[i], font1, XBrushes.Black, xTab1Data, _yPos);
                 }
             }
 
-                //TFSApi.APIRevision approval = null;
-                //if (!string.IsNullOrEmpty(testResult.TestCaseState) && testResult.TestCaseState=="Approved" && testCase !=null)
-                //{
-                //    foreach (TFSApi.APIRevision revision in testCase.Revisions.Where(r=>r.ChangedDate<testResult.DateStarted))
-                //    {
-                //        TFSApi.APIRevisionField revisionField=revision.Fields.Where(f => (f.Value as string) == "Approved" && (f.OriginalValue as string) != "Approved").FirstOrDefault();
-                //        if (revisionField == null)
-                //            continue;
-
-                //        if (approval == null)
-                //            approval = revision;
-                //        else if (revision.ChangedDate>approval.ChangedDate)
-                //            approval = revision;
-                //    }
-                //}
-                //if(approval!=null)
-                //{
-                //    NewLine();
-                //    _page.DrawString("Approved:", font1, XBrushes.Black, xTab2Label, _yPos); _page.DrawString(string.Format("{0} on {1:dd-MMM-yyyy}",approval.ChangedBy ,approval.ChangedDate), font1, XBrushes.Black, xTab2Data, _yPos);
-
-                //}
-
-
-                NewLine(deltaY2, 0);
+            NewLine(deltaY2, 0);
             lastPrinted = eLastPrinted.testResult;
         }
         /// <summary>

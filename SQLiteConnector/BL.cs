@@ -17,12 +17,29 @@ namespace SQLiteConnector
                 _sqLite.Dispose();
             }
         }
-
-
-        public void OpenDatabase(string filePath)
+        public void OpenDatabase(string filePath, bool dbCheck)
         {
             _sqLite = new DAL_SQLite();
             _sqLite.OpenDatabase(filePath);
+            if (dbCheck)
+            {
+                DBCheck("TestResults", "TestCaseDescription", "TEXT");
+            }
+        }
+
+        private void DBCheck(string tableName, string fieldName, string fieldType)
+        {
+            string sql = "select count(*)"
+                + $"\r\nfrom pragma_table_info({DAL_SQLite.SQLText(tableName)})"
+                + $"\r\nwhere name={DAL_SQLite.SQLText(fieldName)}";
+            var fieldExists = _sqLite.ExecuteCommandValue(sql);
+
+            if (fieldExists.HasValue && fieldExists.Value == 0)
+            {
+                sql = $"ALTER TABLE {tableName}"
+                    + $"\r\nADD COLUMN {fieldName} {fieldType}";
+                _sqLite.ExecuteCommand(sql);
+            }
         }
 
         public void TestPlanSave(TestPlan testPlan)
@@ -239,7 +256,7 @@ namespace SQLiteConnector
         }
         public void TestResultInsert(TestStepResult testResult)
         {
-            string sql = "INSERT INTO TestResults (RunId,ResultId,StartedDate,CompletedDate,Revision,State,Outcome,TestCaseId,TestCaseRevision,TestCaseTitle,TestCaseState,TestCaseStepsXML,TestPointId,BuildId,BuildName,RunBy)"
+            string sql = "INSERT INTO TestResults (RunId,ResultId,StartedDate,CompletedDate,Revision,State,Outcome,TestCaseId,TestCaseRevision,TestCaseTitle,TestCaseState,TestCaseStepsXML,TestCaseDescription,TestPointId,BuildId,BuildName,RunBy)"
             + "\r\nValues"
             + "(" + DAL_SQLite.SQLInt(testResult.RunId)
             + "," + DAL_SQLite.SQLInt(testResult.ResultId)
@@ -253,6 +270,7 @@ namespace SQLiteConnector
             + "," + DAL_SQLite.SQLText(testResult.TestCaseTitle)
             + "," + DAL_SQLite.SQLText(testResult.TestCaseState)
             + "," + DAL_SQLite.SQLText(testResult.TestCaseStepsXML)
+            + "," + DAL_SQLite.SQLText(testResult.TestCaseDescription)
             + "," + DAL_SQLite.SQLInt(testResult.TestPointId)
             + "," + DAL_SQLite.SQLInt(testResult.BuildId)
             + "," + DAL_SQLite.SQLText(testResult.BuildName)
@@ -293,7 +311,7 @@ namespace SQLiteConnector
 
         public List<TestStepResult> TestResultsRead(TestPoint testPoint, int? runId)
         {
-            string sql = "SELECT tres.Id,tres.RunId,tres.ResultId,tres.StartedDate,tres.CompletedDate,tres.State,tres.Outcome,tres.TestCaseId,tres.TestCaseStepsXML,tres.BuildName,tres.RunBy,tres.TestCaseState"
+            string sql = "SELECT tres.Id,tres.RunId,tres.ResultId,tres.StartedDate,tres.CompletedDate,tres.State,tres.Outcome,tres.TestCaseId,tres.TestCaseStepsXML,tres.TestCaseDescription,tres.BuildName,tres.RunBy,tres.TestCaseState"
                 + ",tr.Id,tr.OwnerDisplayName,tr.StartedDate,tr.CompletedDate,tr.State"
                 + ",(exists(select * from TestResultSharedSteps st where st.TestResultId=tres.Id)) SharedSteps"
                 + ",tres.Comment"
@@ -326,24 +344,25 @@ namespace SQLiteConnector
                         Outcome = _sqLite.Rdr_DataFieldStr(6),
                         TestCaseId = _sqLite.Rdr_DataFieldInt(7),
                         TestCaseStepsXML = _sqLite.Rdr_DataFieldStr(8),
-                        BuildName = _sqLite.Rdr_DataFieldStr(9),
-                        RunBy = _sqLite.Rdr_DataFieldStr(10),
-                        TestCaseState = _sqLite.Rdr_DataFieldStr(11),
-                        HasSharedSteps = _sqLite.Rdr_DataFieldInt(17) > 0,
-                        Comment=(_sqLite.Rdr_DataFieldIsNull(18)?"": _sqLite.Rdr_DataFieldStr(18))
+                        TestCaseDescription = _sqLite.Rdr_DataFieldStr(9),
+                        BuildName = _sqLite.Rdr_DataFieldStr(10),
+                        RunBy = _sqLite.Rdr_DataFieldStr(11),
+                        TestCaseState = _sqLite.Rdr_DataFieldStr(12),
+                        HasSharedSteps = _sqLite.Rdr_DataFieldInt(18) > 0,
+                        Comment=(_sqLite.Rdr_DataFieldIsNull(19)?"": _sqLite.Rdr_DataFieldStr(19))
                     };
                     if (!dbIds.Contains(testResult.DBId))
                         dbIds.Add(testResult.DBId);
 
-                    if (!_sqLite.Rdr_DataFieldIsNull(12))
+                    if (!_sqLite.Rdr_DataFieldIsNull(13))
                     {
                         testResult.TestRun = new TestRun()
                         {
-                            Id = _sqLite.Rdr_DataFieldInt(12),
-                            OwnerDisplayName = _sqLite.Rdr_DataFieldStr(13),
-                            StartedDate = _sqLite.Rdr_DataFieldDateTime(14),
-                            CompletedDate = _sqLite.Rdr_DataFieldDateTime(15),
-                            State = _sqLite.Rdr_DataFieldStr(16),
+                            Id = _sqLite.Rdr_DataFieldInt(13),
+                            OwnerDisplayName = _sqLite.Rdr_DataFieldStr(14),
+                            StartedDate = _sqLite.Rdr_DataFieldDateTime(15),
+                            CompletedDate = _sqLite.Rdr_DataFieldDateTime(16),
+                            State = _sqLite.Rdr_DataFieldStr(17),
                         };
                     }
 
