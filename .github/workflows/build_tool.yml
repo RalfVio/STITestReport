@@ -54,8 +54,8 @@ jobs:
     - name: Build Installer
       working-directory: D:\a\STITestReport\STITestReport\Install
       run: |
-         & "${$Env:WIX}\bin\candle.exe" STITestReport.wxs
-         & "${$Env:WIX}\bin\light.exe" STITestReport.wixobj
+         & "$($Env:WIX)\bin\candle.exe" STITestReport.wxs
+         & "$($Env:WIX)\bin\light.exe" STITestReport.wixobj
 
     - name: Show Directory Content
       run: dir "D:\a\STITestReport\STITestReport\Install"
