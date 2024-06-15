@@ -47,6 +47,9 @@ jobs:
 
     - name: Show Directory Content
       run: dir "D:\a\STITestReport\STITestReport\STI Test Report\bin\release"
+    
+    - name: Show Directory Content fof Program Files (x86)
+      run: dir "C:\Program Files (x86)"
 
     - name: Build Installer
       working-directory: D:\a\STITestReport\STITestReport\Install
