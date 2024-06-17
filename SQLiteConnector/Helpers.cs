@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SQLite.BusinessObjects
+namespace SQLiteConnector
 {
-    internal static class HTML
+    internal static class Helpers
     {
         public static string HtmlDecode(string html)
         {

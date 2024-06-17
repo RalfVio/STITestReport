@@ -27,7 +27,7 @@ namespace SQLite.BusinessObjects
         public string TestCaseStepsXML { get; set; }
         public string TestCaseState { get; set; }
         public string TestCaseDescription { get; set; }
-        public string TestCaseDescriptionText { get { return HTML.HtmlDecode(TestCaseDescription); } }
+        public string TestCaseDescriptionText { get { return SQLiteConnector.Helpers.HtmlDecode(TestCaseDescription); } }
         public bool HasSharedSteps { get; set; }
         public string Comment { get; set; }
 
@@ -266,9 +266,9 @@ namespace SQLite.BusinessObjects
         public TypesOfStep TypeOfStep { get; set; }
         public int SharedStepsId { get; set; }
         public string Instructions { get; set; }
-        public string InstructionsText { get { return HtmlDecode(Instructions); } }
+        public string InstructionsText { get { return SQLiteConnector.Helpers.HtmlDecode(Instructions); } }
         public string ExpectedResult { get; set; }
-        public string ExpectedResultText { get { return HtmlDecode(ExpectedResult); } }
+        public string ExpectedResultText { get { return SQLiteConnector.Helpers.HtmlDecode(ExpectedResult); } }
         public string Outcome { get; set; }
         public string Comment { get; set; }
         public List<TestResultParameter> Parameters { get; set; }
@@ -297,55 +297,7 @@ namespace SQLite.BusinessObjects
             }
         }
 
-        private static string HtmlDecode(string html)
-        {
-            if (html == null)
-                return string.Empty;
-            string attribute = null; System.Text.StringBuilder result = new System.Text.StringBuilder();
-            for (int i = 0; i < html.Length; i++)
-            {
-                char c = html[i];
-                switch (c)
-                {
-                    case '<': attribute = ""; break;
-                    case '>':
-                        if (attribute == null)
-                            result.Append('>');
-                        else
-                        {
-                            if (attribute.StartsWith("br", System.StringComparison.CurrentCultureIgnoreCase)) result.Append('\n');
-                            if (attribute.StartsWith("p ", System.StringComparison.CurrentCultureIgnoreCase) && result.Length > 0) result.Append('\n');
-                        }
-                        attribute = null; break;
-                    case '&':
-                        if (attribute == null)
-                        {
-                            if (html.Length >= i + 4 && html.Substring(i, 4) == "&gt;")
-                            { result.Append('>'); i += 4 - 1; }
-                            else if (html.Length >= i + 4 && html.Substring(i, 4) == "&lt;")
-                            { result.Append('<'); i += 4 - 1; }
-                            else if (html.Length >= i + 6 && html.Substring(i, 6) == "&nbsp;")
-                            { result.Append(' '); i += 6 - 1; }
-                        }
-                        else
-                            attribute += c;
-                        break;
-
-                    default:
-                        if (attribute == null)
-                        {
-                            result.Append(c);
-                        }
-                        else
-                        {
-                            attribute += c;
-                        }
-                        break;
-                }
-            }
-
-            return result.ToString();
-        }
+        
         public bool IsPassedOrFailed()
         {
             switch (Outcome)
